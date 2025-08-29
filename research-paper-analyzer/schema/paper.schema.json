@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Research Paper Record",
+  "type": "object",
+  "required": ["title","authors","year","summary","evidence"],
+  "additionalProperties": false,
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "authors": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 0
+    },
+    "year": { "type": "integer", "minimum": 1900, "maximum": 2100 },
+    "venue": { "type": ["string","null"] },
+    "arxiv_id": { "type": ["string","null"] },
+    "tasks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "datasets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "size": { "type": ["integer","null"] },
+          "split": {
+            "type": ["object","null"],
+            "properties": {
+              "train": { "type": ["integer","null"] },
+              "val": { "type": ["integer","null"] },
+              "test": { "type": ["integer","null"] }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "methods": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "category": { "type": ["string","null"] },
+          "components": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
+          "description": { "type": ["string","null"] }
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["dataset","metric","value"],
+        "properties": {
+          "dataset": { "type": "string" },
+          "metric": { "type": "string" },
+          "value": { "type": "number" },
+          "unit": { "type": ["string","null"] },
+          "split": { "type": ["string","null"] },
+          "higher_is_better": { "type": ["boolean","null"] },
+          "baseline": { "type": ["string","null"] },
+          "ours_is": { "type": ["string","null"] },
+          "confidence": { "type": ["number","null"] }
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "ablations": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "limitations": { "type": ["string","null"] },
+    "ethics": { "type": ["string","null"] },
+    "open_source": {
+      "type": ["object","null"],
+      "properties": {
+        "code_url": { "type": ["string","null"] },
+        "model_url": { "type": ["string","null"] }
+      },
+      "additionalProperties": false
+    },
+    "novelty": { "type": ["string","null"] },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 800 },
+    "evidence": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["page","snippet"],
+            "properties": {
+              "page": { "type": "integer", "minimum": 1 },
+              "snippet": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "confidence": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": true
+    }
+  }
+}

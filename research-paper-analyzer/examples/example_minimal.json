@@ -1,0 +1,14 @@
+{
+  "title": "A Tiny Demo Model for Example",
+  "authors": ["Alice Example"],
+  "year": 2024,
+  "summary": "This paper proposes a small demo model and reports a single metric on a small dataset.",
+  "evidence": {
+    "title": [
+      {"page": 1, "snippet": "A Tiny Demo Model for Example"}
+    ],
+    "results": [
+      {"page": 5, "snippet": "Accuracy: 91.2% on TinySet (test)"}
+    ]
+  }
+}

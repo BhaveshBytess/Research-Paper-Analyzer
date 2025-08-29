@@ -1,0 +1,46 @@
+{
+  "title": "Hybrid Attention for Efficient Image Classification",
+  "authors": ["Bhavesh Kumar", "Jane Doe"],
+  "year": 2023,
+  "venue": "ImaginaryConf",
+  "arxiv_id": "arXiv:2301.00001",
+  "tasks": ["CV", "Classification"],
+  "datasets": [
+    {"name": "TinyImageNet", "size": 100000, "split": {"train": 90000, "val": 5000, "test": 5000}}
+  ],
+  "methods": [
+    {
+      "name": "HybridAttentionNet",
+      "category": "Transformer+CNN",
+      "components": ["MHA", "PositionalEncoding", "ConvStem"],
+      "description": "Combines conv stem with lightweight transformer blocks."
+    }
+  ],
+  "results": [
+    {
+      "dataset": "TinyImageNet",
+      "metric": "Accuracy",
+      "value": 78.4,
+      "unit": "%",
+      "split": "test",
+      "higher_is_better": true,
+      "baseline": "ResNet18",
+      "ours_is": "HybridAttentionNet",
+      "confidence": 0.92
+    }
+  ],
+  "limitations": "Needs more testing on larger datasets.",
+  "summary": "We present HybridAttentionNet, combining convolutional stem with transformer blocks. On TinyImageNet we achieve 78.4% test accuracy, outperforming ResNet18.",
+  "evidence": {
+    "methods": [
+      {"page": 3, "snippet": "We propose HybridAttentionNet which uses a ConvStem followed by lightweight transformer blocks."}
+    ],
+    "results": [
+      {"page": 6, "snippet": "HybridAttentionNet achieves 78.4% test accuracy on TinyImageNet, compared to 75.0% for ResNet18."}
+    ]
+  },
+  "confidence": {
+    "methods": 0.9,
+    "results": 0.93
+  }
+}
