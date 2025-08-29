@@ -1,0 +1,3 @@
+item_id,context_text,suggested_label,model_confidence,label,annotator,annotated_at
+item_1,"We propose HybridAttentionNet which uses ConvStem and MHA with RoPE.","METHOD",0.45,,
+item_2,"HybridAttentionNet achieves 78.4% test accuracy on TinyImageNet.","RESULT",0.92,,
