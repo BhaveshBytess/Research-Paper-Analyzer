@@ -1,0 +1,6 @@
+{
+  "_cached_at": "2025-08-29T18:49:30.581936",
+  "payload": {
+    "summary": "We introduce HybridAttentionNet — a hybrid conv+transformer model that achieves 78.4% test accuracy on TinyImageNet, outperforming ResNet18. Evaluation is limited to smaller datasets."
+  }
+}

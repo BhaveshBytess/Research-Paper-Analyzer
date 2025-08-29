@@ -1,0 +1,18 @@
+{
+  "_cached_at": "2025-08-29T18:49:30.580328",
+  "payload": {
+    "__root__": [
+      {
+        "dataset": "TinyImageNet",
+        "metric": "Accuracy",
+        "value": 78.4,
+        "unit": "%",
+        "split": "test",
+        "higher_is_better": true,
+        "baseline": "ResNet18",
+        "ours_is": "HybridAttentionNet",
+        "confidence": 0.92
+      }
+    ]
+  }
+}

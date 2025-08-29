@@ -58,7 +58,7 @@ class Paper(BaseModel):
     novelty: Optional[str] = None
     summary: str
     evidence: Dict[str, List[EvidenceItem]]
-    confidence: Optional[Dict[str, float]] = None
+    confidence: Optional[Dict[str, Optional[float]]] = None
 
     class Config:
         anystr_strip_whitespace = True

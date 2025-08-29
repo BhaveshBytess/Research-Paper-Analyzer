@@ -1,0 +1,17 @@
+{
+  "_cached_at": "2025-08-29T18:49:30.579201",
+  "payload": {
+    "methods": [
+      {
+        "name": "HybridAttentionNet",
+        "category": "Transformer+CNN",
+        "components": [
+          "ConvStem",
+          "MHA",
+          "RoPE"
+        ],
+        "description": "ConvStem + light transformer blocks using RoPE."
+      }
+    ]
+  }
+}

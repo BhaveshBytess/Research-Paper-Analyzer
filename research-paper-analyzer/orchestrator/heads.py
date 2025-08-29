@@ -2,9 +2,50 @@
 import json
 from pathlib import Path
 from typing import Any, Dict
+import os
+from dotenv import load_dotenv
+import google.generativeai as genai
 from schema.head_models import MetadataOutput, MethodsOutput, ResultsOutput, LimitationsOutput, SummaryOutput
 
+load_dotenv()
+
 PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
+
+class GeminiLLM:
+    """
+    Wrapper for the Gemini API.
+    """
+    def __init__(self, api_key: str = None):
+        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        if not self.api_key:
+            raise ValueError("Gemini API key not provided. Set GEMINI_API_KEY environment variable.")
+        genai.configure(api_key=self.api_key)
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
+
+    def generate(self, prompt: str, temperature: float = 0.0, max_tokens: int = 1024) -> str:
+        """
+        Generates text using the Gemini model.
+        """
+        generation_config = genai.types.GenerationConfig(
+            max_output_tokens=max_tokens,
+            temperature=temperature
+        )
+        try:
+            response = self.model.generate_content(prompt, generation_config=generation_config)
+            # Clean up the response to remove markdown backticks and "json" specifier
+            cleaned_text = response.text.strip()
+            if cleaned_text.lower().startswith("```json"):
+                cleaned_text = cleaned_text[7:]
+            elif cleaned_text.startswith("```"):
+                cleaned_text = cleaned_text[3:]
+            
+            if cleaned_text.endswith("```"):
+                cleaned_text = cleaned_text[:-3]
+            
+            return cleaned_text.strip()
+        except Exception as e:
+            print(f"Error during Gemini API call: {e}")
+            return "{}"
 
 class MockLLM:
     """
