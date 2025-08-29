@@ -1,0 +1,13 @@
+{
+  "title": "TinyDemo: Fast Classifiers",
+  "authors": ["Alice Example"],
+  "year": 2024,
+  "summary": "TinyDemo improves speed with minor accuracy loss; 91.2% on TinySet.",
+  "methods": [{"name": "TinyDemo", "category": "CNN", "components": ["ConvStem"], "description": null}],
+  "results": [{"dataset": "TinySet", "metric": "Accuracy", "value": 91.2, "unit": "%", "split": "test"}],
+  "evidence": {
+    "title": [{"page": 1, "snippet": "TinyDemo: Fast Classifiers"}],
+    "results": [{"page": 2, "snippet": "TinyDemo achieves 91.2% test accuracy on TinySet."}],
+    "summary": [{"page": 1, "snippet": "TinyDemo improves speed with minor accuracy loss; 91.2% on TinySet."}]
+  }
+}

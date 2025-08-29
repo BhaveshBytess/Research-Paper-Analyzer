@@ -1,0 +1,18 @@
+{
+  "title": "Hybrid Attention for Efficient Image Classification",
+  "authors": ["Bhavesh Kumar", "Jane Doe"],
+  "year": 2023,
+  "summary": "We introduce HybridAttentionNet — a hybrid conv+transformer model achieving 78.4% on TinyImageNet.",
+  "methods": [
+    {"name": "HybridAttentionNet", "category": "Transformer+CNN", "components": ["ConvStem","MHA","RoPE"], "description": null}
+  ],
+  "results": [
+    {"dataset": "TinyImageNet", "metric": "Accuracy", "value": 78.4, "unit": "%", "split": "test"}
+  ],
+  "evidence": {
+    "title": [{"page": 1, "snippet": "Hybrid Attention for Efficient Image Classification"}],
+    "methods": [{"page": 3, "snippet": "We propose HybridAttentionNet which uses ConvStem and MHA with RoPE."}],
+    "results": [{"page": 6, "snippet": "HybridAttentionNet achieves 78.4% test accuracy on TinyImageNet."}],
+    "summary": [{"page": 1, "snippet": "We introduce HybridAttentionNet — a hybrid conv+transformer model achieving 78.4% on TinyImageNet."}]
+  }
+}
