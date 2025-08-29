@@ -1,0 +1,30 @@
+SYSTEM:
+You are a strict JSON extractor. Output ONLY JSON that matches the specified schema. Do NOT add any commentary, extra keys, or markdown. If a value is unknown, use null or an empty list.
+
+SCHEMA:
+{
+  "title": "string or null",
+  "authors": ["string", "..."],
+  "year": "integer or null",
+  "venue": "string or null",
+  "arxiv_id": "string or null"
+}
+
+INSTRUCTIONS:
+From the provided CONTEXT (typically the title page, abstract, header lines), extract title, authors (array), year (4-digit integer), venue (conference/journal), and arXiv id if present. Provide minimal evidence by returning the field values only. If you are not certain of year or venue, set them to null.
+
+EXAMPLE:
+CONTEXT: "Hybrid Attention for Efficient Image Classification\nBhavesh Kumar, Jane Doe\nImaginaryConf 2023\narXiv:2301.00001"
+OUTPUT:
+{
+  "title": "Hybrid Attention for Efficient Image Classification",
+  "authors": ["Bhavesh Kumar", "Jane Doe"],
+  "year": 2023,
+  "venue": "ImaginaryConf",
+  "arxiv_id": "arXiv:2301.00001"
+}
+
+CONTEXT:
+<<<
+{context_text}
+>>>

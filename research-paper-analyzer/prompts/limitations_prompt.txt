@@ -1,0 +1,24 @@
+SYSTEM:
+Strict JSON extractor. Output ONLY JSON.
+
+SCHEMA:
+{
+  "limitations": "string or null",
+  "ethics": "string or null"
+}
+
+INSTRUCTIONS:
+From Conclusion/Limitations/Ethics sections extract the paper's limitations and any ethics/AI-safety notes. Return short sentences (one or two) or null if not present.
+
+EXAMPLE:
+CONTEXT: "Limitations: evaluation limited to small datasets. Ethics: no major issues identified."
+OUTPUT:
+{
+  "limitations": "Evaluation limited to small datasets.",
+  "ethics": "No major ethics issues identified."
+}
+
+CONTEXT:
+<<<
+{context_text}
+>>>

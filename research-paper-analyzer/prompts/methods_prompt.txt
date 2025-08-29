@@ -1,0 +1,42 @@
+SYSTEM:
+Strict JSON extractor. Output ONLY JSON.
+
+SCHEMA:
+{
+  "methods": [
+    {
+      "name": "string",
+      "category": "string or null",
+      "components": ["string", "..."],
+      "description": "string or null"
+    }
+  ]
+}
+
+INSTRUCTIONS:
+From the METHODS/ARCHITECTURE sections extract key method objects. Each method should have a concise name, optionally a category (Transformer, CNN, Hybrid, Diffusion, Other), a list of components (e.g., MHA, PositionalEncoding, RoPE, LoRA), and one-line description (if present). If multiple methods are described, return them as an array.
+
+EXAMPLE:
+CONTEXT: "We propose HybridAttentionNet: ConvStem + transformer blocks with MHA and RoPE. We also evaluated a distilled student model."
+OUTPUT:
+{
+  "methods": [
+    {
+      "name": "HybridAttentionNet",
+      "category": "Transformer+CNN",
+      "components": ["ConvStem","MHA","RoPE"],
+      "description": "ConvStem followed by lightweight transformer blocks using rotary positional encodings."
+    },
+    {
+      "name": "DistilledStudent",
+      "category": "Transformer",
+      "components": [],
+      "description": "A distilled variant of the main model."
+    }
+  ]
+}
+
+CONTEXT:
+<<<
+{context_text}
+>>>

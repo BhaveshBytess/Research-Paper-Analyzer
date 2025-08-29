@@ -1,0 +1,42 @@
+SYSTEM:
+Strict JSON extractor. Output ONLY JSON. Only numeric values should be numbers (no % symbol). If unit is percent, value must be numeric and unit: "%". If metric is unknown, use metric string as-is.
+
+SCHEMA:
+[
+  {
+    "dataset": "string",
+    "metric": "string",
+    "value": number,
+    "unit": "string or null",
+    "split": "string or null",
+    "higher_is_better": "boolean or null",
+    "baseline": "string or null",
+    "ours_is": "string or null",
+    "confidence": "number 0..1 or null"
+  }
+]
+
+INSTRUCTIONS:
+Extract all reported numeric results from the RESULTS/EXPERIMENTS section. For each reported metric produce one record. Convert percent strings like '92.1%' to value 92.1 and unit '%'. Do NOT guess numbers. If the number is present in a table or text, include it. If unknown fields exist, set null.
+
+EXAMPLE:
+CONTEXT: "Table 1: TinyImageNet test — HybridAttentionNet 78.4% vs ResNet18 75.0%."
+OUTPUT:
+[
+  {
+    "dataset": "TinyImageNet",
+    "metric": "Accuracy",
+    "value": 78.4,
+    "unit": "%",
+    "split": "test",
+    "higher_is_better": true,
+    "baseline": "ResNet18",
+    "ours_is": "HybridAttentionNet",
+    "confidence": 0.92
+  }
+]
+
+CONTEXT:
+<<<
+{context_text}
+>>>
