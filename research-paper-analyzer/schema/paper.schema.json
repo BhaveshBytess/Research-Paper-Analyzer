@@ -3,7 +3,7 @@
   "title": "Research Paper Record",
   "type": "object",
   "required": ["title","authors","year","summary","evidence"],
-  "additionalProperties": false,
+  "additionalProperties": true,
   "properties": {
     "title": { "type": "string", "minLength": 1 },
     "authors": {
@@ -118,7 +118,7 @@
     "confidence": {
       "type": "object",
       "patternProperties": {
-        "^.*$": { "type": "number", "minimum": 0, "maximum": 1 }
+        "^.*$": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
       },
       "additionalProperties": true
     }

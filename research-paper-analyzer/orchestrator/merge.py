@@ -20,7 +20,7 @@ def merge_heads_to_paper(head_outputs: Dict[str, Any]) -> Dict[str, Any]:
     metadata = head_outputs.get("metadata")
     if metadata:
         paper["title"] = getattr(metadata, "title", None)
-        paper["authors"] = getattr(metadata, "authors", []) or []
+        paper["authors"] = getattr(metadata, "authors", [])
         paper["year"] = getattr(metadata, "year", None)
         paper["venue"] = getattr(metadata, "venue", None)
         paper["arxiv_id"] = getattr(metadata, "arxiv_id", None)
@@ -31,26 +31,19 @@ def merge_heads_to_paper(head_outputs: Dict[str, Any]) -> Dict[str, Any]:
 
     # Methods
     methods_out = head_outputs.get("methods")
+    raw_methods = []
     if methods_out:
-        # each MethodItem -> dict
-        raw_methods = getattr(methods_out, "methods", [])
-        methods_list: List[Dict[str, Any]] = [m.dict() if hasattr(m, 'dict') else m for m in raw_methods]
-        paper["methods"] = methods_list
-    else:
-        paper["methods"] = []
+        raw_methods = getattr(methods_out, "methods", []) or []
+    paper["methods"] = [m.dict() if hasattr(m, 'dict') else m for m in raw_methods]
 
     # Results
     results_out = head_outputs.get("results")
+    raw_results = []
     if results_out:
-        # ResultsOutput is a __root__ List[ResultRecord]
-        try:
-            raw_results = getattr(results_out, "__root__", [])
-            results_list = [r.dict() if hasattr(r, 'dict') else r for r in raw_results]
-        except Exception:
-            results_list = []
-        paper["results"] = results_list
-    else:
-        paper["results"] = []
+        # Handle case where __root__ could be None from a bad LLM parse
+        raw_results = getattr(results_out, "__root__", []) or []
+    
+    paper["results"] = [r.dict() if hasattr(r, 'dict') else r for r in raw_results]
 
     # Limitations & ethics
     limits_out = head_outputs.get("limitations")
@@ -63,21 +56,20 @@ def merge_heads_to_paper(head_outputs: Dict[str, Any]) -> Dict[str, Any]:
 
     # Summary
     summary_out = head_outputs.get("summary")
-    paper["summary"] = getattr(summary_out, "summary", "") if summary_out else ""
+    paper["summary"] = getattr(summary_out, "summary", None) if summary_out else None
 
     # Small confidence map (aggregate): take available confidences from results if present
     confidence_map: Dict[str, float] = {}
     # metadata confidence: assume 1.0 for mock (or absent)
     confidence_map["metadata"] = 1.0
-    if results_out:
-        # average of result confidences if present
-        vals = []
-        for r in getattr(results_out, "__root__", []):
-            c = getattr(r, "confidence", None)
-            if isinstance(c, (int, float)):
-                vals.append(float(c))
-        if vals:
-            confidence_map["results"] = sum(vals) / len(vals)
+    
+    vals = []
+    for r in raw_results:
+        c = getattr(r, "confidence", None)
+        if isinstance(c, (int, float)):
+            vals.append(float(c))
+    if vals:
+        confidence_map["results"] = sum(vals) / len(vals)
     else:
         confidence_map["results"] = None
 

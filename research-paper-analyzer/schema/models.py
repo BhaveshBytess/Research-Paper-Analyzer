@@ -62,3 +62,4 @@ class Paper(BaseModel):
 
     class Config:
         anystr_strip_whitespace = True
+        extra = "allow"
