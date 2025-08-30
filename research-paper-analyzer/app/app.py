@@ -8,17 +8,21 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 from pprint import pprint
+from dotenv import load_dotenv
 
 # Add project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import pipeline pieces
 from ingestion.parser import parse_pdf_to_pages
-from orchestrator.heads import HeadRunner, GeminiLLM
+from orchestrator.heads import HeadRunner, GeminiLLM, OpenRouterLLM
 from orchestrator.pipeline import Pipeline
 from orchestrator.repair import Repairer
 from evidence.locator import attach_evidence_for_paper
 from store.store import save_paper, list_papers, load_paper
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configuration
 st.set_page_config(page_title="Research Paper Analyzer", layout="wide")
@@ -102,6 +106,13 @@ def process_pdf(filepath: str, run_store_save: bool = False, llm_choice: str = "
             st.stop()
         llm_client = GeminiLLM(api_key=gemini_api_key)
         runner = HeadRunner(llm_client=llm_client)
+    elif "OpenRouterLLM" in llm_choice:
+        openrouter_api_key = os.environ.get("OPENROUTER_API_KEY")
+        if not openrouter_api_key:
+            st.error("OPENROUTER_API_KEY environment variable not set. Cannot use OpenRouterLLM.")
+            st.stop()
+        llm_client = OpenRouterLLM(api_key=openrouter_api_key)
+        runner = HeadRunner(llm_client=llm_client)
     else:
         runner = HeadRunner()  # Defaults to MockLLM
 
@@ -164,10 +175,10 @@ st.header("Upload PDF")
 # --- Main Controls ---
 llm_choice = st.radio(
     "LLM to use:",
-    ("MockLLM (Offline)", "GeminiLLM (Online)"),
+    ("MockLLM (Offline)", "GeminiLLM (Online)", "OpenRouterLLM (Online)"),
     index=0,
     horizontal=True,
-    help="MockLLM is fast and free for testing. GeminiLLM uses the live Google API (requires key)."
+    help="MockLLM is fast and free for testing. GeminiLLM and OpenRouterLLM use live APIs (requires key)."
 )
 
 uploaded = st.file_uploader("Upload a research paper (PDF)", type=["pdf"], accept_multiple_files=False)

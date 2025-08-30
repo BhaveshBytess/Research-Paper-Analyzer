@@ -5,11 +5,56 @@ from typing import Any, Dict
 import os
 from dotenv import load_dotenv
 import google.generativeai as genai
+from openai import OpenAI
 from schema.head_models import MetadataOutput, MethodsOutput, ResultsOutput, LimitationsOutput, SummaryOutput
 
 load_dotenv()
 
 PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
+
+class OpenRouterLLM:
+    """
+    Wrapper for the OpenRouter API using DeepSeek model.
+    """
+    def __init__(self, api_key: str = None):
+        self.api_key = api_key or os.getenv("OPENROUTER_API_KEY")
+        if not self.api_key:
+            raise ValueError("OpenRouter API key not provided. Set OPENROUTER_API_KEY environment variable.")
+        self.client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=self.api_key
+        )
+
+    def generate(self, prompt: str, temperature: float = 0.0, max_tokens: int = 1024) -> str:
+        """
+        Generates text using the DeepSeek model via OpenRouter.
+        """
+        try:
+            completion = self.client.chat.completions.create(
+                model="deepseek/deepseek-chat",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            cleaned_text = completion.choices[0].message.content.strip()
+            if cleaned_text.lower().startswith("```json"):
+                cleaned_text = cleaned_text[7:]
+            elif cleaned_text.startswith("```"):
+                cleaned_text = cleaned_text[3:]
+            
+            if cleaned_text.endswith("```"):
+                cleaned_text = cleaned_text[:-3]
+            
+            return cleaned_text.strip()
+        except Exception as e:
+            print(f"Error during OpenRouter API call: {e}")
+            return "{}"
+
 
 class GeminiLLM:
     """
