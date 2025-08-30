@@ -48,7 +48,7 @@
     }
   ],
   "limitations": "Needs more testing on larger datasets.",
-  "summary": "We present HybridAttentionNet, combining convolutional stem with transformer blocks. On TinyImageNet we achieve 78.4% test accuracy, outperforming ResNet18.",
+  "summary": "We propose HybridAttentionNet which uses a ConvStem followed by lightweight transformer blocks. (p3) On TinyImageNet we achieve 78.4% test accuracy, outperforming ResNet18. (see p6: \"HybridAttentionNet achieves 78.4% test accuracy on TinyImageNet, compared to 75....\")",
   "evidence": {
     "methods": [
       {
