@@ -2,7 +2,7 @@
 
 *Turn long research PDFs into grounded, structured JSON and an evidence-anchored summary—fast.*
 
-![demo](assets/demo.gif) <!-- Replace with actual GIF later -->
+![demo](assets/deepseek.mp4) <!-- Replace with actual GIF later -->
 
 ---
 
