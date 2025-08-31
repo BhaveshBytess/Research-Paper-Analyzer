@@ -14,7 +14,7 @@
 
 ---
 
-## Quickstart (90 seconds)
+## Quickstart
 
 ```bash
 # 1) Create & activate venv
