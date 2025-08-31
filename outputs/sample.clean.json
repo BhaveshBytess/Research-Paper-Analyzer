@@ -1,0 +1,31 @@
+{
+  "file": "C:\\Users\\oumme\\OneDrive\\Desktop\\1ST-PROJECT-CHATGPT\\sample.pdf",
+  "basename": "sample",
+  "parser_used": "pymupdf",
+  "needs_ocr": true,
+  "pages": [
+    {
+      "page_no": 1,
+      "raw_text": "This is a test PDF for the CLI.\n",
+      "blocks": [
+        {
+          "bbox": [
+            72.0,
+            28.989768981933594,
+            229.3919677734375,
+            45.4777717590332
+          ],
+          "text": "This is a test PDF for the CLI."
+        }
+      ],
+      "clean_text": "This is a test PDF for the CLI."
+    }
+  ],
+  "confidence": {
+    "metadata": 0.0,
+    "results": 0.0
+  },
+  "datasets": [],
+  "tasks": [],
+  "paper_type": "review"
+}
