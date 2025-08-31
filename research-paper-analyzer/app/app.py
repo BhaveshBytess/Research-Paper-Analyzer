@@ -26,7 +26,7 @@ load_dotenv()
 
 # Configuration
 st.set_page_config(page_title="Research Paper Analyzer", layout="wide")
-st.title("Research Paper Analyzer — Resume Demo")
+st.title("Research Paper Analyzer")
 st.markdown(
     """
     Upload a research paper (PDF). The app will:
