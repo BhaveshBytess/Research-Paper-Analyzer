@@ -159,8 +159,4 @@ Guarantees ≥0.9 alignment without LLMs; use LLM later for style.
 
 ---
 
-## License
-
-MIT (see LICENSE)
-
 
