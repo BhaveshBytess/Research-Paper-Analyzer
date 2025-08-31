@@ -1,54 +1,110 @@
 # Research Paper Analyzer
 
-This project is a Streamlit application for parsing and analyzing scientific research papers. It extracts structured information from PDF files, including metadata, methods, results, and more, using a configurable LLM backend.
+Turn long research PDFs into grounded, structured JSON and an evidence‑anchored summary—fast.
 
-The tool also includes a post-processing pipeline to clean, enrich, and validate the extracted data.
+- Deterministic ≥0.9 summary alignment (no API required); LLM optional for polish.
+- Supports Gemini and OpenRouter (DeepSeek) backends, plus a Mock mode.
+- Clean post‑processing, confidence scoring, and sidecar metadata for auditability.
 
-## Features
+## Quickstart (90 seconds)
 
-- **PDF Parsing**: Extracts text and layout information from research papers.
-- **Structured Extraction**: Uses LLMs (Gemini, OpenRouter/DeepSeek) to extract key information into a structured JSON format.
-- **Streamlit UI**: An interactive web interface to upload papers and view results.
-- **Post-processing**: A suite of scripts to improve data quality:
-    - **Schema Hygiene**: Normalizes data types (e.g., ensures result values are floats).
-    - **Confidence Scoring**: Computes a confidence score for each extracted result based on its provenance.
-    - **Data Enrichment**: Automatically populates `tasks` and `datasets` fields if they are missing, based on the content of the paper.
-    - **Summary Validation**: Calculates a "summary alignment" score that measures how well the generated summary is supported by evidence snippets from the paper.
-- **Sidecar Metadata**: Exports internal metadata (`_meta`) into a separate `.meta.json` file to keep the primary output clean.
+```powershell
+# 1) Create/activate venv (PowerShell)
+python -m venv venv
+.\venv\Scripts\Activate
 
-## How to Run
+# 2) Install deps
+pip install -r requirements.txt
+pip install sentence-transformers rapidfuzz nltk
+python -m nltk.downloader punkt
 
-1.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+# 3) Configure keys (optional for LLM)
+# Create .env in repo root
+# GEMINI_API_KEY=your_key
+# OPENROUTER_API_KEY=your_key
 
-2.  **Set up your environment:**
-    Create a `.env` file in the root of the `research-paper-analyzer` directory and add your API keys:
-    ```
-    GEMINI_API_KEY="your_gemini_api_key"
-    OPENROUTER_API_KEY="your_openrouter_api_key"
-    ```
-
-3.  **Run the Streamlit app:**
-    ```bash
-    streamlit run app/app.py
-    ```
-
-## Post-processing Scripts
-
-To run the post-processing pipeline on an extracted JSON file:
-
-```bash
-python scripts/postprocess_paper.py path/to/your_paper.json
+# 4) Run the app
+streamlit run app/app.py
 ```
 
-This will generate two new files:
-- `your_paper.clean.json`: The main, cleaned-up data file.
-- `your_paper.meta.json`: A sidecar file containing processing metadata.
+Or run the pipeline on a sample JSON:
 
-To validate the summary of a cleaned file:
-
-```bash
-python scripts/validate_summary.py path/to/your_paper.clean.json
+```powershell
+# Post-process
+python scripts/postprocess_paper.py examples\example_full.json
+# Validate (semantic)
+python scripts/validate_summary_semantic.py examples\example_full.clean.json
+# Repair deterministically and re-validate
+python scripts/repair_summary_anchor_semantic.py examples\example_full.clean.json examples\example_full.repaired.json
+python scripts/validate_summary_semantic.py examples\example_full.repaired.json
 ```
+
+Expected: alignment score ≥ 0.9 (the sample reaches 1.0 after repair).
+
+## What you get
+
+- Structured extraction: metadata, methods, results, datasets/tasks, limitations, summary
+- Evidence for every claim: `{ page, snippet }` collections preserved
+- Confidence: per-result and aggregate (results mean)
+- Clean outputs:
+  - `paper.clean.json` — canonicalized, enriched
+  - `paper.meta.json` — sidecar `_meta`
+  - `paper.repaired.json` — summary anchored to evidence
+
+## Architecture (file-wise)
+
+- Ingestion — `ingestion/parser.py`: PDF → pages/text (born‑digital; no OCR)
+- Evidence — `evidence/locator.py`: find and store `{page, snippet}`
+- Orchestration — `orchestrator/pipeline.py`, `orchestrator/heads.py` (+ `prompts/*.txt`):
+  - Backends: Gemini, OpenRouter(DeepSeek), Mock
+  - Heads: metadata, methods, results, summary
+- Schema — `schema/*.py`, `schema/paper.schema.json`: Pydantic + JSON Schema
+- Post‑process — `scripts/postprocess_paper.py` + `results/compute_confidence.py`
+- Validate — `scripts/validate_summary_semantic.py` (embeddings + fuzzy)
+- Repair — `scripts/repair_summary_anchor_semantic.py` (deterministic ≥0.9)
+- UI — `app/app.py` (Streamlit)
+- Examples — `examples/*.json` (raw/clean/repaired)
+
+Flow: Parse → Extract (LLM) → Merge → Post‑process → Validate → Repair → Validate → Serve.
+
+## Configuration
+
+- `.env` (optional if using Mock only)
+  - `GEMINI_API_KEY` — Google Gemini
+  - `OPENROUTER_API_KEY` — OpenRouter (e.g., `deepseek/deepseek-chat`)
+- Backend selection in the Streamlit UI; code paths in `orchestrator/heads.py`.
+
+## Deterministic summary alignment (why it matters)
+
+We measure summary‑to‑evidence grounding per sentence.
+- Semantic validator: `sentence-transformers` + cosine, with `rapidfuzz` fallback
+- Repair strategy:
+  - If a sentence matches evidence strongly → keep and append `(see pX: "snippet...")`
+  - If weak → replace with best evidence `(pX)`
+- Guarantees high alignment without an LLM; use LLM later for style.
+
+## Troubleshooting
+
+- Activation (PowerShell): `.\nvenv\Scripts\Activate`
+- Scanned PDFs: OCR isn’t enabled. Add Tesseract/pytesseract before ingestion.
+- Model download is slow: it’s normal on first run; cached afterward.
+- Alignment low (<0.9): ensure evidence exists; run the repair script; lower threshold slightly (0.70) if many paraphrases.
+
+## Repo map (selected)
+
+- `app/app.py` — UI
+- `ingestion/parser.py` — PDF parsing
+- `orchestrator/*.py` — pipeline, heads, merge
+- `prompts/*.txt` — head prompts
+- `schema/*.py` — data models
+- `scripts/*.py` — post‑process, validate, repair
+- `examples/*.json` — sample outputs
+
+## Contributing
+
+- Dev setup: create venv, install deps, run tests.
+- PRs welcome for new metrics, tasks/datasets lexicons, OCR integration.
+
+## License
+
+MIT (see LICENSE).
