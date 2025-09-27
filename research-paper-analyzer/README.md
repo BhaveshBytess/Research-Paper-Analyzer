@@ -1,5 +1,13 @@
 # Research Paper Analyzer
-**Turns long research PDFs into structured JSON + a short, evidence-backed summary.**
+Convert research PDFs into structured JSON + evidence-backed summaries.
+
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+Turn long-form papers into reviewer-friendly artifacts:
+- Evidence-backed summaries that cite the pages they come from.
+- Automatic structure repair keeps JSON schema-valid and auditable.
+- Batch tools for quick evaluation runs across multiple PDFs.
 
 ### What it does
 - **Real LLMs:** Works with **Grok** and **DeepSeek** (via OpenRouter).
@@ -110,4 +118,4 @@ Short clip in `assets/demo.mp4` (or GIF). Shows: open app -> upload PDF -> view 
 
 ### License
 
-MIT
+MIT — see [LICENSE](LICENSE) for full terms.
