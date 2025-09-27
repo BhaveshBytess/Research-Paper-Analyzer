@@ -4,6 +4,8 @@ Convert research PDFs into structured JSON + evidence-backed summaries.
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+![demo](assets/deepseek.gif) <!-- Demo GIF showing the application workflow -->
+
 Turn long-form papers into reviewer-friendly artifacts:
 - Evidence-backed summaries that cite the pages they come from.
 - Automatic structure repair keeps JSON schema-valid and auditable.
@@ -118,4 +120,4 @@ Short clip in `assets/demo.mp4` (or GIF). Shows: open app -> upload PDF -> view 
 
 ### License
 
-MIT — see [LICENSE](LICENSE) for full terms.
+MIT ï¿½ see [LICENSE](LICENSE) for full terms.
