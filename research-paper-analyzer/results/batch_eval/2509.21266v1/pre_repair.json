@@ -1,0 +1,43 @@
+{
+  "title": "GROUNDING AI EXPLANATIONS IN EXPERIENCE: A REFLECTIVE COGNITIVE ARCHITECTURE FOR CLINICAL DECISION SUPPORT",
+  "authors": [
+    "Zijian Shao",
+    "Haiyang Shen",
+    "Mugeng Liu",
+    "Gecheng Fu",
+    "Yaoqi Guo",
+    "Yanfeng Wang",
+    "Yun Ma"
+  ],
+  "year": 2025,
+  "venue": null,
+  "arxiv_id": "arXiv:2509.21266v1",
+  "methods": [],
+  "results": [],
+  "limitations": null,
+  "ethics": null,
+  "summary": "We propose the Reflective Cognitive Architecture (RCA), a novel framework coordinating multiple LLMs to enhance clinical decision support by balancing accuracy and explainability. RCA employs iterative rule refinement and distribution-aware checks to improve logic and reasoning. Evaluated on one private and two public datasets against 22 baselines, RCA achieves up to 40% relative improvement in accuracy and robustness while generating clear, evidence-based explanations. Key results include RCA + GPT-4.1 scoring 8.03 on the CRT dataset, outperforming traditional MLs and LLM-based methods.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "evidence": {},
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null,
+  "_meta": {
+    "repair_log": [],
+    "remaining_errors": [],
+    "evidence_report": {
+      "found": 2,
+      "missing": 1,
+      "details": {
+        "title": true,
+        "summary": true
+      },
+      "evidence_precision": 0.6666666666666666
+    }
+  }
+}

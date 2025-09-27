@@ -1,96 +1,76 @@
 # orchestrator/heads.py
 import json
-from pathlib import Path
-from typing import Any, Dict
 import os
+from pathlib import Path
+from typing import Any, Dict, Optional
+
 from dotenv import load_dotenv
-import google.generativeai as genai
 from openai import OpenAI
-from schema.head_models import MetadataOutput, MethodsOutput, ResultsOutput, LimitationsOutput, SummaryOutput
+
+from schema.head_models import (
+    LimitationsOutput,
+    MetadataOutput,
+    MethodsOutput,
+    ResultsOutput,
+    SummaryOutput,
+)
 
 load_dotenv()
 
 PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
 
+
+class LLMGenerationError(RuntimeError):
+    """Raised when an LLM backend fails to return usable content."""
+
+
 class OpenRouterLLM:
-    """
-    Wrapper for the OpenRouter API using DeepSeek model.
-    """
-    def __init__(self, api_key: str = None):
+    """Wrapper for the OpenRouter API (supports Grok, DeepSeek, etc.)."""
+
+    DEFAULT_MODEL = "deepseek/deepseek-chat"
+
+    def __init__(self, api_key: Optional[str] = None, model_id: Optional[str] = None):
         self.api_key = api_key or os.getenv("OPENROUTER_API_KEY")
         if not self.api_key:
-            raise ValueError("OpenRouter API key not provided. Set OPENROUTER_API_KEY environment variable.")
-        self.client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=self.api_key
-        )
+            raise ValueError(
+                "OpenRouter API key not provided. Set OPENROUTER_API_KEY environment variable."
+            )
 
-    def generate(self, prompt: str, temperature: float = 0.0, max_tokens: int = 1024) -> str:
-        """
-        Generates text using the DeepSeek model via OpenRouter.
-        """
+        self.model_id = model_id or os.getenv("OPENROUTER_MODEL") or self.DEFAULT_MODEL
+        self.client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=self.api_key)
+
+    def generate(
+        self,
+        prompt: str,
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+    ) -> str:
+        """Generate content using the configured OpenRouter model."""
+
         try:
             completion = self.client.chat.completions.create(
-                model="deepseek/deepseek-chat",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
+                model=self.model_id,
+                messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
-                max_tokens=max_tokens
+                max_tokens=max_tokens,
             )
             cleaned_text = completion.choices[0].message.content.strip()
             if cleaned_text.lower().startswith("```json"):
                 cleaned_text = cleaned_text[7:]
             elif cleaned_text.startswith("```"):
                 cleaned_text = cleaned_text[3:]
-            
+
             if cleaned_text.endswith("```"):
                 cleaned_text = cleaned_text[:-3]
-            
+
             return cleaned_text.strip()
-        except Exception as e:
-            print(f"Error during OpenRouter API call: {e}")
-            return "{}"
-
-
-class GeminiLLM:
-    """
-    Wrapper for the Gemini API.
-    """
-    def __init__(self, api_key: str = None):
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        if not self.api_key:
-            raise ValueError("Gemini API key not provided. Set GEMINI_API_KEY environment variable.")
-        genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
-
-    def generate(self, prompt: str, temperature: float = 0.0, max_tokens: int = 1024) -> str:
-        """
-        Generates text using the Gemini model.
-        """
-        generation_config = genai.types.GenerationConfig(
-            max_output_tokens=max_tokens,
-            temperature=temperature
-        )
-        try:
-            response = self.model.generate_content(prompt, generation_config=generation_config)
-            # Clean up the response to remove markdown backticks and "json" specifier
-            cleaned_text = response.text.strip()
-            if cleaned_text.lower().startswith("```json"):
-                cleaned_text = cleaned_text[7:]
-            elif cleaned_text.startswith("```"):
-                cleaned_text = cleaned_text[3:]
-            
-            if cleaned_text.endswith("```"):
-                cleaned_text = cleaned_text[:-3]
-            
-            return cleaned_text.strip()
-        except Exception as e:
-            print(f"Error during Gemini API call: {e}")
-            return "{}"
+        except Exception as exc:
+            detail = str(exc)
+            raise LLMGenerationError(
+                f"OpenRouter call failed for model '{self.model_id}'. "
+                "Verify OPENROUTER_API_KEY, OPENROUTER_MODEL, and quota. "
+                f"Details: {detail}"
+            ) from exc
 
 class MockLLM:
     """

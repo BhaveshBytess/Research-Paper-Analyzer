@@ -1,5 +1,6 @@
 # orchestrator/merge.py
 from typing import Dict, Any, List
+from datetime import datetime
 from schema.head_models import MethodItem, ResultRecord
 from schema.models import Paper
 from pydantic import ValidationError
@@ -58,6 +59,25 @@ def merge_heads_to_paper(head_outputs: Dict[str, Any]) -> Dict[str, Any]:
     summary_out = head_outputs.get("summary")
     paper["summary"] = getattr(summary_out, "summary", None) if summary_out else None
 
+    repairs: List[str] = []
+    if not paper.get("title"):
+        paper["title"] = "Untitled (placeholder)"
+        repairs.append("Inserted placeholder title because LLM returned none.")
+
+    if not isinstance(paper.get("authors"), list):
+        paper["authors"] = []
+        repairs.append("Normalized authors list from invalid LLM output.")
+
+    if paper.get("year") is None:
+        paper["year"] = datetime.utcnow().year
+        repairs.append("Filled missing year with current year placeholder.")
+
+    if not paper.get("summary"):
+        paper["summary"] = "Summary unavailable (placeholder)."
+        repairs.append("Inserted placeholder summary because LLM returned none.")
+
+    paper["authors"] = paper.get("authors") or []
+
     # Small confidence map (aggregate): take available confidences from results if present
     confidence_map: Dict[str, float] = {}
     # metadata confidence: assume 1.0 for mock (or absent)
@@ -74,6 +94,11 @@ def merge_heads_to_paper(head_outputs: Dict[str, Any]) -> Dict[str, Any]:
         confidence_map["results"] = None
 
     paper["confidence"] = confidence_map
+
+    if repairs:
+        meta = paper.setdefault("_meta", {})
+        repair_log = meta.setdefault("repair_log", [])
+        repair_log.extend(repairs)
 
     # Evidence is empty for now (Stage 6 will populate)
     paper["evidence"] = {}

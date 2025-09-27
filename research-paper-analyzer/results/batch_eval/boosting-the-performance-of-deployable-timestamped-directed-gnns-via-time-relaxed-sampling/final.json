@@ -1,0 +1,75 @@
+{
+  "title": "Boosting the performance of Deployable Timestamped Directed GNNs via Time-Relaxed Sampling",
+  "authors": [
+    "Arihant Jain",
+    "Gundeep Arora",
+    "Anoop Saladi"
+  ],
+  "year": 2025,
+  "venue": null,
+  "arxiv_id": null,
+  "methods": [
+    {
+      "name": "TRD-GNN",
+      "category": "GNN",
+      "components": [
+        "Forward Neighborhood",
+        "Backward Neighborhood",
+        "Time-Relaxed Sampling",
+        "Message Passing"
+      ],
+      "description": "A novel GNN sampling layer that relaxes the time-directed nature of timestamped directed graphs to prevent label leakage while improving performance in node classification."
+    }
+  ],
+  "results": [],
+  "limitations": null,
+  "ethics": "Ethical impacts depend on the specific domain of the data. Experiments conducted on publicly available datasets in compliance with fair-use clauses.",
+  "summary": "The paper addresses performance drops in timestamped directed graph neural networks (GNNs) for tasks like user classification and fraud detection, caused by label leakage when adapting undirected models to time-directed inference. It resets baselines to highlight failures of undirected training/inference in directed settings. The main contribution is TRD-GNN, introducing a novel GNN sampling layer that relaxes the time-directed graph structure during training, limited to prevent label leakage while enabling robust deployment. This bridges the mismatch in message passing semantics. Benefits are demonstrated qualitatively on public benchmark and proprietary e-commerce datasets for node classification.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "_meta": {
+    "repair_log": [
+      "Filled missing year with current year placeholder."
+    ],
+    "remaining_errors": [],
+    "evidence_report": {
+      "found": 3,
+      "missing": 0,
+      "details": {
+        "title": true,
+        "methods": [
+          true
+        ],
+        "summary": true
+      },
+      "evidence_precision": 1.0
+    }
+  },
+  "evidence": {
+    "title": [
+      {
+        "page": 1,
+        "snippet": "Boosting the performance of Deployable Timestamped Directed GNNs via Time-Relaxed Sampling"
+      }
+    ],
+    "methods": [
+      {
+        "page": 1,
+        "snippet": "Abstract. Timestamped graphs find applications in critical business problems like user classification, fraud detection, etc. This is due to the inherent nature of the data generation process, in which relation- ships between nodes are observed at defined timestamps. Deployment- focused GNN models should be trained on point-in-time information about node feat"
+      }
+    ],
+    "summary": [
+      {
+        "page": 4,
+        "snippet": "GNN"
+      }
+    ]
+  },
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null
+}

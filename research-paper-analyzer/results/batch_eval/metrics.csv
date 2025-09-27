@@ -1,0 +1,11 @@
+paper_id,schema_pass,repair_count,evidence_coverage,alignment_pre,alignment_post,notes
+2502.00401v2,True,0,1.0,0.0,0.5,
+2509.21117v1,True,0,1.0,0.0,0.0,
+2509.21266v1,True,0,1.0,0.0,0.5,
+2509.21291v1,True,4,0.0,0.0,0.0,
+2509.21310v1,True,4,1.0,0.0,1.0,
+boosting-the-performance-of-deployable-timestamped-directed-gnns-via-time-relaxed-sampling,True,1,1.0,0.0,0.4,
+graph-model-explainer-tool,True,4,0.0,0.0,0.0,
+gsampler-general-and-efficient-gpu-based-graph-sampling-for-graph-learning,True,4,1.0,0.0,1.0,
+spottarget-rethinking-the-effect-of-target-edges-for-link-prediction-in-graph-neural-networks,True,4,0.0,0.0,0.0,
+TIMEBASED,True,4,1.0,0.0,1.0,

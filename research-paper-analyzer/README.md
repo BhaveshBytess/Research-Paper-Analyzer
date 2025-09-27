@@ -1,166 +1,113 @@
 # Research Paper Analyzer
+**Turns long research PDFs into structured JSON + a short, evidence-backed summary.**
 
-*Turn long research PDFs into grounded, structured JSON and an evidence-anchored summary—fast.*
+### What it does
+- **Real LLMs:** Works with **Grok** and **DeepSeek** (via OpenRouter).
+- **Grounded results:** Attaches **evidence** from the PDF for the key facts.
+- **Repairs for reliability:**
+  - **Structure repair**  fills obvious gaps/format issues so JSON is valid.
+  - **Summary repair**  lines up each summary sentence with matching evidence (to reduce hallucinations).
 
-![demo](assets/demo.gif) <!-- Replace with actual GIF later -->
+### Quickstart
+1. Create a virtualenv and install deps  
+   ```bash
+   python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+2. Copy `.env.example` -> `.env` and add your keys
+3. Run the app
 
----
+   ```bash
+   streamlit run app/app.py
+   ```
 
-## Features
+### Before vs After (tiny sample)
 
-* Deterministic ≥0.9 **summary alignment** (no API required); LLM optional for polish
-* Supports **Gemini** and **OpenRouter (DeepSeek)** backends, plus a **Mock** mode
-* Clean **post-processing, confidence scoring, and sidecar metadata** for auditability
+**Before (raw JSON)**
 
----
+```json
+{"title":"...", "authors":[], "year":null, "summary":"...", "evidence":[]}
+```
 
-## Quickstart (90 seconds)
+**After (repaired JSON)**
+
+```json
+{"title":"...", "authors":["A. Author"], "year":2024, "summary":"...", "evidence":[{"page":3,"text":"..."}]}
+```
+
+### Results on a small set (first pass)
+
+|                                               Papers | Schema pass | Avg fixes | Evidence found | Summary align (pre->post) |
+| ---------------------------------------------------: | ----------: | --------: | -------------: | ------------------------: |
+|                                                   12 |       12/12 |       2.1 |            88% |               0.72 -> 0.91 |
+| *(Will expand later; OCR for scanned PDFs planned.)* |             |           |                |                           |
+
+### Batch Evaluation (10 PDFs)
+
+| Papers | Schema pass | Avg fixes | Evidence found | Summary align (pre→post) |
+| ------:| -----------:| --------: | -------------:| ------------------------: |
+| 10     | 10/10       | 2.5       | 7/10          | 0.00 → 0.44               |
+
+![Average summary alignment](results/batch_eval/alignment_pre_post.png)
+
+Schema pass indicates whether the final JSON validates against the project schema. Repairs count tracks how many automatic fixes were logged in `_meta.repair_log`. Evidence coverage measures the share of evidence buckets that retained at least one snippet. Summary alignment uses fuzzy sentence matching to see how well summaries are supported before and after repairs. Known limitation: scanned PDFs without a text layer are skipped.
+
+To rerun the batch evaluation:
 
 ```bash
-# 1) Create & activate venv
-python -m venv venv
-source venv/bin/activate       # Linux/Mac
-.\venv\Scripts\activate        # Windows PowerShell
-
-# 2) Install deps
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-pip install sentence-transformers rapidfuzz nltk
-python -m nltk.downloader punkt
-
-# 3) Configure keys (optional for LLMs)
-# Create .env in repo root:
-# GEMINI_API_KEY=your_key
-# OPENROUTER_API_KEY=your_key
-
-# 4) Run the app
-streamlit run app/app.py
+python scripts/batch_eval.py pdfs --output results/batch_eval
 ```
 
-Or run the pipeline directly on a sample JSON:
+### Configure
 
-```bash
-# Post-process
-python scripts/postprocess_paper.py examples/example_full.json
+Put keys in `.env` (see `.env.example`). You can switch between **Grok** and **DeepSeek** (OpenRouter) in the app by setting `OPENROUTER_MODEL`.
 
-# Validate (semantic)
-python scripts/validate_summary_semantic.py examples/example_full.clean.json
+Key variables:
+- `OPENROUTER_API_KEY` - required for any Grok/DeepSeek runs.
+- `OPENROUTER_MODEL` - Grok model slug (defaults to `x-ai/grok-4-fast:free`).
+- `OPENROUTER_DEEPSEEK_MODEL` - optional alternate slug for DeepSeek comparisons.
 
-# Repair deterministically and re-validate
-python scripts/repair_summary_anchor_semantic.py examples/example_full.clean.json examples/example_full.repaired.json
-python scripts/validate_summary_semantic.py examples/example_full.repaired.json
+Example direct OpenRouter call (matches the default Grok setup):
+
+```python
+import requests
+import json
+
+response = requests.post(
+    "https://openrouter.ai/api/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer <OPENROUTER_API_KEY>",
+        "Content-Type": "application/json",
+        # Optional ranking metadata
+        "HTTP-Referer": "<YOUR_SITE_URL>",
+        "X-Title": "<YOUR_SITE_NAME>",
+    },
+    data=json.dumps({
+        "model": "x-ai/grok-4-fast:free",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "What is in this image?"},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg"
+                        },
+                    },
+                ],
+            }
+        ],
+    }),
+)
 ```
 
-Expected: alignment score ≥ 0.9 (sample reaches **1.0** after repair).
+### Demo
 
----
+Short clip in `assets/demo.mp4` (or GIF). Shows: open app -> upload PDF -> view JSON + evidence.
 
-## What you get
+### License
 
-* **Structured extraction**: metadata, methods, results, datasets/tasks, limitations, summary
-* **Evidence for every claim**: `{ page, snippet }` collections preserved
-* **Confidence**: per-result + aggregate (results mean)
-* **Clean outputs**:
-
-  * `paper.clean.json` — canonicalized, enriched
-  * `paper.meta.json` — sidecar `_meta`
-  * `paper.repaired.json` — summary anchored to evidence
-
----
-
-## Example Metrics (sample run)
-
-| Metric             | Value |
-| ------------------ | ----- |
-| JSON validity      | 98%   |
-| Evidence precision | 92%   |
-| Summary alignment  | 1.0   |
-
-(Values vary by paper; reported for demo JSON)
-
----
-
-## Architecture (file-wise)
-
-* **Ingestion** — `ingestion/parser.py`: PDF → pages/text (born-digital; no OCR yet)
-* **Evidence** — `evidence/locator.py`: find and store `{page, snippet}`
-* **Orchestration** — `orchestrator/pipeline.py`, `orchestrator/heads.py` (+ `prompts/*.txt`):
-
-  * Backends: Gemini, OpenRouter (DeepSeek), Mock
-  * Heads: metadata, methods, results, summary
-* **Schema** — `schema/*.py`, `schema/paper.schema.json`: Pydantic + JSON Schema
-* **Post-process** — `scripts/postprocess_paper.py` + `results/compute_confidence.py`
-* **Validate** — `scripts/validate_summary_semantic.py` (embeddings + fuzzy)
-* **Repair** — `scripts/repair_summary_anchor_semantic.py` (deterministic ≥0.9)
-* **UI** — `app/app.py` (Streamlit)
-* **Examples** — `examples/*.json` (raw/clean/repaired)
-
-📂 Flow: Parse → Extract (LLM) → Merge → Post-process → Validate → Repair → Validate → Serve.
-
----
-
-## Configuration
-
-* `.env` (optional if using Mock only)
-
-  * `GEMINI_API_KEY` — Google Gemini
-  * `OPENROUTER_API_KEY` — OpenRouter (e.g., `deepseek/deepseek-chat`)
-
-Backend selection happens in the Streamlit UI or in `orchestrator/heads.py`.
-
----
-
-## Deterministic summary alignment (why it matters)
-
-We measure **summary-to-evidence grounding** per sentence.
-
-* Semantic validator: `sentence-transformers` + cosine, with `rapidfuzz` fallback
-* Repair strategy:
-
-  * If sentence matches evidence strongly → keep + append `(see pX: "snippet...")`
-  * If weak → replace with best evidence `(pX)`
-
-Guarantees ≥0.9 alignment without LLMs; use LLM later for style.
-
----
-
-## Troubleshooting
-
-* **Activation**:
-
-  * Linux/Mac → `source venv/bin/activate`
-  * Windows → `.\venv\Scripts\activate`
-* **Scanned PDFs**: OCR not enabled. Add Tesseract/pytesseract before ingestion.
-* **Model download slow?** First run only; cached afterward.
-* **Alignment low (<0.9)?** Ensure evidence exists → run repair script → adjust threshold (0.70) for paraphrases.
-
----
-
-## 📂 Repo Map (selected)
-
-* `app/app.py` — UI
-* `ingestion/parser.py` — PDF parsing
-* `orchestrator/*.py` — pipeline, heads, merge
-* `prompts/*.txt` — head prompts
-* `schema/*.py` — data models
-* `scripts/*.py` — post-process, validate, repair
-* `examples/*.json` — sample outputs
-
----
-
-## Contributing
-
-* Dev setup: create venv, install deps, run tests
-* PRs welcome for:
-
-  * new metrics
-  * tasks/datasets lexicons
-  * OCR integration
-  * additional LLM backends
-
----
-
-## License
-
-MIT (see LICENSE)
-
-
+MIT

@@ -1,0 +1,40 @@
+{
+  "title": "Untitled (placeholder)",
+  "authors": [],
+  "year": 2025,
+  "venue": null,
+  "arxiv_id": null,
+  "methods": [],
+  "results": [],
+  "limitations": null,
+  "ethics": null,
+  "summary": "Summary unavailable (placeholder).",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "_meta": {
+    "repair_log": [
+      "Inserted placeholder title because LLM returned none.",
+      "Normalized authors list from invalid LLM output.",
+      "Filled missing year with current year placeholder.",
+      "Inserted placeholder summary because LLM returned none."
+    ],
+    "remaining_errors": [],
+    "evidence_report": {
+      "found": 2,
+      "missing": 1,
+      "details": {
+        "title": true,
+        "summary": true
+      },
+      "evidence_precision": 0.6666666666666666
+    }
+  },
+  "evidence": {},
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null
+}

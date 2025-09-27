@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 # Import pipeline pieces
 from ingestion.parser import parse_pdf_to_pages
-from orchestrator.heads import HeadRunner, GeminiLLM, OpenRouterLLM
+from orchestrator.heads import HeadRunner, OpenRouterLLM, LLMGenerationError
 from orchestrator.pipeline import Pipeline
 from orchestrator.repair import Repairer
 from evidence.locator import attach_evidence_for_paper
@@ -23,6 +23,19 @@ from store.store import save_paper, list_papers, load_paper
 
 # Load environment variables from .env file
 load_dotenv()
+
+OPENROUTER_MODEL_DEFAULT = os.environ.get("OPENROUTER_MODEL", "x-ai/grok-4-fast:free")
+OPENROUTER_MODEL_DEEPSEEK = os.environ.get("OPENROUTER_DEEPSEEK_MODEL", "deepseek/deepseek-chat")
+_OPENROUTER_MODEL_OPTIONS_RAW = [
+    ("Grok (OpenRouter)", OPENROUTER_MODEL_DEFAULT),
+    ("DeepSeek (OpenRouter)", OPENROUTER_MODEL_DEEPSEEK),
+]
+OPENROUTER_MODEL_OPTIONS = []
+_seen_router_models = set()
+for label, model in _OPENROUTER_MODEL_OPTIONS_RAW:
+    if model and model not in _seen_router_models:
+        OPENROUTER_MODEL_OPTIONS.append((label, model))
+        _seen_router_models.add(model)
 
 # Configuration
 st.set_page_config(page_title="Research Paper Analyzer", layout="wide")
@@ -55,7 +68,7 @@ def show_evidence(evidence: dict):
             st.markdown(f"- **Page {page}** — {snippet}")
 
 # Processing function (used both by UI and tests if needed)
-def process_pdf(filepath: str, run_store_save: bool = False, llm_choice: str = "MockLLM (Offline)", clear_cache: bool = False):
+def process_pdf(filepath: str, run_store_save: bool = False, llm_choice: str = "offline", clear_cache: bool = False):
     """
     End-to-end local processing pipeline:
       - parse pdf -> pages
@@ -99,19 +112,15 @@ def process_pdf(filepath: str, run_store_save: bool = False, llm_choice: str = "
     # 2) Run heads (Pipeline)
     debug["steps"].append("running_heads")
     
-    if "GeminiLLM" in llm_choice:
-        gemini_api_key = os.environ.get("GEMINI_API_KEY")
-        if not gemini_api_key:
-            st.error("GEMINI_API_KEY environment variable not set. Cannot use GeminiLLM.")
-            st.stop()
-        llm_client = GeminiLLM(api_key=gemini_api_key)
-        runner = HeadRunner(llm_client=llm_client)
-    elif "OpenRouterLLM" in llm_choice:
+    if llm_choice.startswith("openrouter::"):
         openrouter_api_key = os.environ.get("OPENROUTER_API_KEY")
         if not openrouter_api_key:
-            st.error("OPENROUTER_API_KEY environment variable not set. Cannot use OpenRouterLLM.")
+            st.error(
+                "OPENROUTER_API_KEY environment variable not set. Cannot use OpenRouter models."
+            )
             st.stop()
-        llm_client = OpenRouterLLM(api_key=openrouter_api_key)
+        model_id = llm_choice.split("::", 1)[1]
+        llm_client = OpenRouterLLM(api_key=openrouter_api_key, model_id=model_id)
         runner = HeadRunner(llm_client=llm_client)
     else:
         runner = HeadRunner()  # Defaults to MockLLM
@@ -173,13 +182,19 @@ if saved:
 st.header("Upload PDF")
 
 # --- Main Controls ---
-llm_choice = st.radio(
+llm_options = [("Offline (Local)", "offline")]
+for label, model_id in OPENROUTER_MODEL_OPTIONS:
+    llm_options.append((label, f"openrouter::{model_id}"))
+
+llm_labels = [label for label, _ in llm_options]
+llm_choice_label = st.radio(
     "LLM to use:",
-    ("MockLLM (Offline)", "GeminiLLM (Online)", "OpenRouterLLM (Online)"),
+    llm_labels,
     index=0,
     horizontal=True,
-    help="MockLLM is fast and free for testing. GeminiLLM and OpenRouterLLM use live APIs (requires key)."
+    help="Offline mode uses the canned pipeline for quick demos. Grok and DeepSeek (OpenRouter) require API keys."
 )
+llm_choice = next(value for label, value in llm_options if label == llm_choice_label)
 
 uploaded = st.file_uploader("Upload a research paper (PDF)", type=["pdf"], accept_multiple_files=False)
 
@@ -200,7 +215,7 @@ if uploaded:
     tfile.write(uploaded.read())
     tfile.flush()
     
-    st.success(f"File uploaded. Ready to process with **{llm_choice}**.")
+    st.success(f"File uploaded. Ready to process with **{llm_choice_label}**.")
     
     # Controls
     col1, col2 = st.columns([1, 1])
@@ -210,7 +225,7 @@ if uploaded:
         clear_cache = st.checkbox("Clear cache before running", value=True, help="Force re-running the LLM heads instead of using cached results.")
 
     if st.button("Process Paper"):
-        with st.spinner(f"Running pipeline with {llm_choice}. This may take a moment..."):
+        with st.spinner(f"Running pipeline with {llm_choice_label}. This may take a moment..."):
             try:
                 final_paper, debug = process_pdf(
                     tfile.name, 
@@ -218,6 +233,10 @@ if uploaded:
                     llm_choice=llm_choice,
                     clear_cache=clear_cache
                 )
+                debug["llm_used_label"] = llm_choice_label
+            except LLMGenerationError as err:
+                st.error(str(err))
+                st.stop()
             except Exception as e:
                 st.error(f"Processing failed: {e}")
                 st.exception(e) # show full traceback for debugging
@@ -225,7 +244,7 @@ if uploaded:
 
         # Display summary and key info
         st.subheader("Summary")
-        st.info(f"Generated by: **{debug.get('llm_used')}**")
+        st.info(f"Generated by: **{llm_choice_label}**")
         st.write(final_paper.get("summary", "— (no summary)"))
 
         st.subheader("Validation & Repair")
@@ -279,5 +298,5 @@ else:
     st.info("Upload a PDF to begin.")
 
 st.markdown("---")
-st.caption("Streamlit demo — use MockLLM for offline development. To switch to a real LLM, create a real HeadRunner with the provider client and pass it to Pipeline(head_runner=YourHeadRunner).")
+st.caption("Streamlit demo — offline mode uses canned responses for local development. Provide OPENROUTER_API_KEY to run Grok or DeepSeek (OpenRouter) end-to-end.")
 

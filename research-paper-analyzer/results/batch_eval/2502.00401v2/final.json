@@ -1,0 +1,56 @@
+{
+  "title": "SPECTRO-RIEMANNIAN GRAPH NEURAL NETWORKS",
+  "authors": [
+    "Karish Grover",
+    "Haiyang Yu",
+    "Xiang Song",
+    "Qi Zhu",
+    "Han Xie",
+    "Vassilis N. Ioannidis",
+    "Christos Faloutsos"
+  ],
+  "year": 2025,
+  "venue": "ICLR",
+  "arxiv_id": "arXiv:2502.00401v2",
+  "methods": [],
+  "results": [],
+  "limitations": null,
+  "ethics": null,
+  "summary": "We propose Spectro-Riemannian Graph Neural Networks (CUSP), a novel graph representation learning framework that integrates spectral and curvature insights. CUSP introduces three key components: Cusp Laplacian, Cusp Filtering, and Cusp Pooling, enabling optimization of node embeddings in mixed-curvature manifolds (hyperbolic, spherical, Euclidean). Evaluated on eight datasets, CUSP achieves up to 5.3% improvement in node classification and link prediction tasks over state-of-the-art models. The method leverages Ollivier-Ricci curvature and Riemannian graph filters to enhance representation learning for complex graph structures.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "evidence": {
+    "title": [
+      {
+        "page": 1,
+        "snippet": "SPECTRO-RIEMANNIAN GRAPH NEURAL NETWORKS"
+      }
+    ],
+    "summary": [
+      {
+        "page": 19,
+        "snippet": "y"
+      }
+    ]
+  },
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null,
+  "_meta": {
+    "repair_log": [],
+    "remaining_errors": [],
+    "evidence_report": {
+      "found": 2,
+      "missing": 1,
+      "details": {
+        "title": true,
+        "summary": true
+      },
+      "evidence_precision": 0.6666666666666666
+    }
+  }
+}

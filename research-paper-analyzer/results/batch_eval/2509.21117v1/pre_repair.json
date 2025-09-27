@@ -1,0 +1,50 @@
+{
+  "title": "TRUSTJUDGE: INCONSISTENCIES OF LLM-AS-A-JUDGE AND HOW TO ALLEVIATE THEM",
+  "authors": [
+    "Yidong Wang",
+    "Yunze Song",
+    "Tingyuan Zhu",
+    "Xuanwang Zhang",
+    "Zhuohao Yu",
+    "Hao Chen",
+    "Chiyu Song",
+    "Qiufeng Wang",
+    "Cunxiang Wang",
+    "Zhen Wu",
+    "Xinyu Dai",
+    "Yue Zhang",
+    "Wei Ye",
+    "Shikun Zhang"
+  ],
+  "year": 2025,
+  "venue": null,
+  "arxiv_id": "arXiv:2509.21117v1",
+  "methods": [],
+  "results": [],
+  "limitations": null,
+  "ethics": null,
+  "summary": "TrustJudge addresses inconsistencies in LLM-as-a-judge frameworks, specifically Score-Comparison and Pairwise Transitivity inconsistencies. It introduces a probabilistic framework with distribution-sensitive scoring and likelihood-aware aggregation. Evaluated using Llama-3.1-70B-Instruct, TrustJudge reduces Score-Comparison inconsistency by 8.43% (from 23.32% to 14.89%) and Pairwise Transitivity inconsistency by 10.82% (from 15.22% to 4.40%), while maintaining higher accuracy. The framework improves reliability without requiring additional training or human annotations.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "evidence": {},
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null,
+  "_meta": {
+    "repair_log": [],
+    "remaining_errors": [],
+    "evidence_report": {
+      "found": 1,
+      "missing": 2,
+      "details": {
+        "title": true,
+        "summary": false
+      },
+      "evidence_precision": 0.3333333333333333
+    }
+  }
+}
