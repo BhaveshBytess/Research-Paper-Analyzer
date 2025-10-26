@@ -27,7 +27,7 @@ class LLMGenerationError(RuntimeError):
 class OpenRouterLLM:
     """Wrapper for the OpenRouter API (supports Grok, DeepSeek, etc.)."""
 
-    DEFAULT_MODEL = "deepseek/deepseek-chat"
+    DEFAULT_MODEL = "deepseek/deepseek-chat-v3.1:free"
 
     def __init__(self, api_key: Optional[str] = None, model_id: Optional[str] = None):
         self.api_key = api_key or os.getenv("OPENROUTER_API_KEY")
@@ -46,15 +46,34 @@ class OpenRouterLLM:
         max_tokens: int = 1024,
     ) -> str:
         """Generate content using the configured OpenRouter model."""
+        prompt = prompt[:3000]
+        max_tokens = min(max_tokens, 256)
 
         try:
             completion = self.client.chat.completions.create(
                 model=self.model_id,
-                messages=[{"role": "user", "content": prompt}],
+                messages=[
+                    {"role": "system", "content": ("You are a strict JSON generator. Respond with JSON only. Do not include code fences, prose, or explanations.")},
+                    {"role": "user", "content": prompt},
+                ],
                 temperature=temperature,
                 max_tokens=max_tokens,
+                response_format={"type": "json_object"},
             )
-            cleaned_text = completion.choices[0].message.content.strip()
+            message = completion.choices[0].message
+            cleaned_text = (message.content or "").strip()
+            if not cleaned_text:
+                reasoning = getattr(message, "reasoning", None)
+                if reasoning:
+                    cleaned_text = reasoning.strip()
+            if not cleaned_text:
+                reasoning_details = getattr(message, "reasoning_details", None) or []
+                for detail in reasoning_details:
+                    text = detail.get("text")
+                    if text:
+                        cleaned_text = text.strip()
+                        if cleaned_text:
+                            break
             if cleaned_text.lower().startswith("```json"):
                 cleaned_text = cleaned_text[7:]
             elif cleaned_text.startswith("```"):
@@ -63,13 +82,38 @@ class OpenRouterLLM:
             if cleaned_text.endswith("```"):
                 cleaned_text = cleaned_text[:-3]
 
+            # Strip known sentinel tokens emitted by some models (DeepSeek)
+            SENTINELS = {
+                "<|begin_of_sentence|>",
+                "<|end_of_sentence|>",
+                "<|end_of_text|>",
+                "<|fim_suffix|>",
+                "<|fim_middle|>",
+                "<|fim_prefix|>",
+                "<\uff5cbegin\u2581of\u2581sentence\uff5c>",
+                "<\uff5cend\u2581of\u2581sentence\uff5c>",
+                "<\uff5cend\u2581of\u2581text\uff5c>",
+            }
+            for token in SENTINELS:
+                if token in cleaned_text:
+                    cleaned_text = cleaned_text.replace(token, " ")
+
+            cleaned_text = cleaned_text.strip()
+
             return cleaned_text.strip()
         except Exception as exc:
             detail = str(exc)
+            hint = ""
+            if "No endpoints found matching your data policy" in detail:
+                hint = (
+                    " Update your OpenRouter privacy settings to allow the selected"
+                    " model (https://openrouter.ai/settings/privacy) or pick a model"
+                    " permitted by your account."
+                )
             raise LLMGenerationError(
                 f"OpenRouter call failed for model '{self.model_id}'. "
-                "Verify OPENROUTER_API_KEY, OPENROUTER_MODEL, and quota. "
-                f"Details: {detail}"
+                "Verify OPENROUTER_API_KEY, OPENROUTER_MODEL, and quota."
+                f"{hint} Details: {detail}"
             ) from exc
 
 class MockLLM:

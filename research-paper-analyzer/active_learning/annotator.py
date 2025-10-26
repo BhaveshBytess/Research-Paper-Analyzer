@@ -7,7 +7,7 @@ import csv
 from typing import List, Dict, Iterable
 import pandas as pd
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 ANNOTATION_COLS = ["item_id", "context_text", "suggested_label", "model_confidence", "label", "annotator", "annotated_at"]
 
@@ -58,6 +58,6 @@ def ingest_annotations(csv_path: str) -> List[Dict]:
             "item_id": row.get("item_id"),
             "label": label,
             "annotator": row.get("annotator", "") or "unknown",
-            "annotated_at": row.get("annotated_at", "") or datetime.utcnow().isoformat()
+            "annotated_at": row.get("annotated_at", "") or datetime.now(timezone.utc).isoformat()
         })
     return out

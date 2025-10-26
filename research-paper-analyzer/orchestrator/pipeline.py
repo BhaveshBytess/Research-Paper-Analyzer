@@ -5,8 +5,8 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, Any, Callable
-from datetime import datetime
-from orchestrator.heads import HeadRunner
+from datetime import datetime, timezone
+from orchestrator.heads import HeadRunner, LLMGenerationError
 from orchestrator.merge import merge_heads_to_paper
 
 CACHE_DIR = Path(".cache")
@@ -54,7 +54,15 @@ class Pipeline:
 
         # Save to cache
         with open(cache_path, "w", encoding="utf-8") as f:
-            json.dump({"_cached_at": datetime.utcnow().isoformat(), "payload": payload}, f, ensure_ascii=False, indent=2)
+            json.dump(
+                {
+                    "_cached_at": datetime.now(timezone.utc).isoformat(),
+                    "payload": payload,
+                },
+                f,
+                ensure_ascii=False,
+                indent=2,
+            )
         # Return the payload (not wrapped)
         return {"payload": payload}
 
@@ -84,6 +92,7 @@ class Pipeline:
 
         # Await all
         results = {}
+        errors = {}
         for head_name, task in tasks.items():
             try:
                 res = await task
@@ -96,6 +105,13 @@ class Pipeline:
                 results[head_name] = res_obj
             except Exception as e:
                 results[head_name] = None
+                errors[head_name] = e
+        if errors:
+            messages = []
+            for head, err in errors.items():
+                messages.append(f"{head}: {err}")
+            summary = "; ".join(messages)
+            raise LLMGenerationError(f"Head failures detected: {summary}") from next(iter(errors.values()))
         return results
 
     def run(self, contexts: Dict[str, str]) -> Dict[str, Any]:

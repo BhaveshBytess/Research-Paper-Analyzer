@@ -6,7 +6,7 @@ import os
 import sys
 import shutil
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from pprint import pprint
 from dotenv import load_dotenv
 
@@ -24,10 +24,14 @@ from store.store import save_paper, list_papers, load_paper
 # Load environment variables from .env file
 load_dotenv()
 
-OPENROUTER_MODEL_DEFAULT = os.environ.get("OPENROUTER_MODEL", "x-ai/grok-4-fast:free")
-OPENROUTER_MODEL_DEEPSEEK = os.environ.get("OPENROUTER_DEEPSEEK_MODEL", "deepseek/deepseek-chat")
+OPENROUTER_MODEL_DEFAULT = os.environ.get(
+    "OPENROUTER_MODEL", "google/gemma-3n-e4b-it:free"
+)
+OPENROUTER_MODEL_DEEPSEEK = os.environ.get(
+    "OPENROUTER_DEEPSEEK_MODEL", "deepseek/deepseek-chat-v3.1:free"
+)
 _OPENROUTER_MODEL_OPTIONS_RAW = [
-    ("Grok (OpenRouter)", OPENROUTER_MODEL_DEFAULT),
+    ("Gemma (OpenRouter)", OPENROUTER_MODEL_DEFAULT),
     ("DeepSeek (OpenRouter)", OPENROUTER_MODEL_DEEPSEEK),
 ]
 OPENROUTER_MODEL_OPTIONS = []
@@ -78,7 +82,7 @@ def process_pdf(filepath: str, run_store_save: bool = False, llm_choice: str = "
     Returns (final_paper_dict, debug_info)
     """
     debug = {"steps": [], "timings": {}, "llm_used": llm_choice}
-    t0 = datetime.utcnow()
+    t0 = datetime.now(timezone.utc)
 
     if clear_cache:
         cache_dir = ".cache"
@@ -94,19 +98,32 @@ def process_pdf(filepath: str, run_store_save: bool = False, llm_choice: str = "
     debug["steps"].append("parsing")
     parsed = parse_pdf_to_pages(filepath, save_json=False, out_dir="outputs")
     pages = parsed.get("pages", [])
-    debug["timings"]["parsing"] = (datetime.utcnow() - t0).total_seconds()
+    debug["timings"]["parsing"] = (datetime.now(timezone.utc) - t0).total_seconds()
 
-    # Build simple contexts
-    metadata_ctx = pages[0]["clean_text"] if pages else ""
-    half = max(1, len(pages)//2)
-    methods_ctx = "\n\n".join([p.get("clean_text","") for p in pages[:half]])
-    results_ctx = "\n\n".join([p.get("clean_text","") for p in pages])
-    limitations_ctx = "\n\n".join([p.get("clean_text","") for p in pages[-2:]]) if pages else ""
-    summary_ctx = (pages[0].get("clean_text","") if pages else "") + "\n\n" + (pages[-1].get("clean_text","") if pages else "")
+    # Build simple contexts from page text
+    joiner = "\n\n"
+
+    def _clip(text, limit):
+        text = text or ""
+        return text[:limit]
+
+    def _collect(pages_subset, per_page, total):
+        pieces = [_clip(p.get("clean_text"), per_page) for p in pages_subset]
+        return _clip(joiner.join(pieces), total)
+
+    metadata_ctx = _clip(pages[0].get("clean_text") if pages else "", 800)
+    half = max(1, len(pages) // 2)
+    methods_ctx = _collect(pages[:half], 400, 1200)
+    results_ctx = _collect(pages, 400, 1600)
+    limitations_ctx = _collect(pages[-2:], 400, 800) if pages else ""
+    summary_ctx = _collect([pages[0], pages[-1]], 600, 1200) if pages else ""
 
     contexts = {
-        "metadata": metadata_ctx, "methods": methods_ctx, "results": results_ctx,
-        "limitations": limitations_ctx, "summary": summary_ctx
+        "metadata": metadata_ctx,
+        "methods": methods_ctx,
+        "results": results_ctx,
+        "limitations": limitations_ctx,
+        "summary": summary_ctx,
     }
 
     # 2) Run heads (Pipeline)
@@ -127,14 +144,14 @@ def process_pdf(filepath: str, run_store_save: bool = False, llm_choice: str = "
 
     pipeline = Pipeline(head_runner=runner, cache_dir=".cache")
     merged = pipeline.run(contexts)
-    t1 = datetime.utcnow()
+    t1 = datetime.now(timezone.utc)
     debug["timings"]["run_heads"] = (t1 - t0).total_seconds() - debug["timings"]["parsing"]
 
     # 3) Repair
     debug["steps"].append("repair")
     repairer = Repairer(llm_client=None)
     repaired, applied, remaining = repairer.repair_json(merged, max_attempts=1)
-    t2 = datetime.utcnow()
+    t2 = datetime.now(timezone.utc)
     debug["timings"]["repair"] = (t2 - t1).total_seconds()
     repaired.setdefault("_meta", {})
     repaired["_meta"].setdefault("repair_log", [])
@@ -146,7 +163,7 @@ def process_pdf(filepath: str, run_store_save: bool = False, llm_choice: str = "
     final_paper, evidence_report = attach_evidence_for_paper(repaired, pages, fuzzy_threshold=85.0)
     final_paper.setdefault("_meta", {})
     final_paper["_meta"]["evidence_report"] = evidence_report
-    debug["timings"]["total_elapsed"] = (datetime.utcnow() - t0).total_seconds()
+    debug["timings"]["total_elapsed"] = (datetime.now(timezone.utc) - t0).total_seconds()
 
     # optionally save into datastore
     if run_store_save:

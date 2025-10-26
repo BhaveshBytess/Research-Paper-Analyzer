@@ -1,6 +1,6 @@
 # orchestrator/repair.py
 import copy
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Tuple
 from pathlib import Path
 import json
@@ -37,7 +37,7 @@ class Repairer:
         # Ensure required fields exist:
         # From Stage 0 schema, required = ["title","authors","year","summary","evidence"]
         # We'll add conservative placeholders but explicitly log them for human review.
-        now_year = datetime.utcnow().year
+        now_year = datetime.now(timezone.utc).year
         required_defaults = {
             "title": "UNKNOWN_TITLE_REPAIRED",
             "authors": [],
@@ -71,7 +71,7 @@ class Repairer:
         repaired.setdefault("_meta", {})
         repaired["_meta"].setdefault("repair_log", [])
         repaired["_meta"]["repair_log"].extend(repairs)
-        repaired["_meta"]["repaired_at"] = datetime.utcnow().isoformat()
+        repaired["_meta"]["repaired_at"] = datetime.now(timezone.utc).isoformat()
 
         return repaired, repairs
 
@@ -110,7 +110,7 @@ class Repairer:
                 if isinstance(candidate, dict):
                     candidate.setdefault("_meta", {})
                     candidate["_meta"].setdefault("from_llm", True)
-                    candidate["_meta"]["llm_repaired_at"] = datetime.utcnow().isoformat()
+                    candidate["_meta"]["llm_repaired_at"] = datetime.now(timezone.utc).isoformat()
                     applied_repairs_all.append("LLM repair attempted")
                     # Validate candidate
                     errors_candidate = validate_with_jsonschema(candidate)

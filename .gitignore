@@ -1,0 +1,8 @@
+.env
+.cache/
+.venv/
+outputs/
+datastore/
+debug-last-run.json
+paper-last-run.json
+

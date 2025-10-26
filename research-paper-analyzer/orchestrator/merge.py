@@ -1,6 +1,6 @@
 # orchestrator/merge.py
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timezone
 from schema.head_models import MethodItem, ResultRecord
 from schema.models import Paper
 from pydantic import ValidationError
@@ -69,7 +69,7 @@ def merge_heads_to_paper(head_outputs: Dict[str, Any]) -> Dict[str, Any]:
         repairs.append("Normalized authors list from invalid LLM output.")
 
     if paper.get("year") is None:
-        paper["year"] = datetime.utcnow().year
+        paper["year"] = datetime.now(timezone.utc).year
         repairs.append("Filled missing year with current year placeholder.")
 
     if not paper.get("summary"):

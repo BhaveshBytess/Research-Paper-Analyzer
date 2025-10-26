@@ -12,7 +12,7 @@ Turn long-form papers into reviewer-friendly artifacts:
 - Batch tools for quick evaluation runs across multiple PDFs.
 
 ### What it does
-- **Real LLMs:** Works with **Grok** and **DeepSeek** (via OpenRouter).
+- **Real LLMs:** Works with **Google Gemma 3N** and **DeepSeek** (via OpenRouter).
 - **Grounded results:** Attaches **evidence** from the PDF for the key facts.
 - **Repairs for reliability:**
   - **Structure repair**  fills obvious gaps/format issues so JSON is valid.
@@ -72,14 +72,14 @@ python scripts/batch_eval.py pdfs --output results/batch_eval
 
 ### Configure
 
-Put keys in `.env` (see `.env.example`). You can switch between **Grok** and **DeepSeek** (OpenRouter) in the app by setting `OPENROUTER_MODEL`.
+Put keys in `.env` (see `.env.example`). You can switch between **Gemma 3N** and **DeepSeek** (OpenRouter) in the app by setting `OPENROUTER_MODEL`.
 
 Key variables:
-- `OPENROUTER_API_KEY` - required for any Grok/DeepSeek runs.
-- `OPENROUTER_MODEL` - Grok model slug (defaults to `x-ai/grok-4-fast:free`).
-- `OPENROUTER_DEEPSEEK_MODEL` - optional alternate slug for DeepSeek comparisons.
+- `OPENROUTER_API_KEY` - required for any Gemma/DeepSeek runs.
+- `OPENROUTER_MODEL` - Gemma model slug (defaults to `google/gemma-3n-e4b-it:free`).
+- `OPENROUTER_DEEPSEEK_MODEL` - optional alternate slug for DeepSeek comparisons (defaults to `deepseek/deepseek-chat-v3.1:free`).
 
-Example direct OpenRouter call (matches the default Grok setup):
+Example direct OpenRouter call (matches the default Gemma setup):
 
 ```python
 import requests
@@ -95,7 +95,7 @@ response = requests.post(
         "X-Title": "<YOUR_SITE_NAME>",
     },
     data=json.dumps({
-        "model": "x-ai/grok-4-fast:free",
+        "model": "google/gemma-3n-e4b-it:free",
         "messages": [
             {
                 "role": "user",
@@ -111,6 +111,30 @@ response = requests.post(
             }
         ],
     }),
+)
+```
+
+To hit the new DeepSeek free tier directly, swap the model slug and adjust headers as needed:
+
+```python
+import requests
+import json
+
+response = requests.post(
+    "https://openrouter.ai/api/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer <OPENROUTER_API_KEY>",
+        "Content-Type": "application/json",
+        # Optional ranking metadata
+        "HTTP-Referer": "<YOUR_SITE_URL>",
+        "X-Title": "<YOUR_SITE_NAME>",
+    },
+    data=json.dumps({
+        "model": "deepseek/deepseek-chat-v3.1:free",
+        "messages": [
+            {"role": "user", "content": "What is the meaning of life?"}
+        ],
+    })
 )
 ```
 
