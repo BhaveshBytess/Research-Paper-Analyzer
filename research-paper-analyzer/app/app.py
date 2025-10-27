@@ -30,9 +30,10 @@ OPENROUTER_MODEL_DEFAULT = os.environ.get(
 OPENROUTER_MODEL_DEEPSEEK = os.environ.get(
     "OPENROUTER_DEEPSEEK_MODEL", "deepseek/deepseek-chat-v3.1:free"
 )
+# Prefer DeepSeek as the first OpenRouter option by default
 _OPENROUTER_MODEL_OPTIONS_RAW = [
-    ("Gemma (OpenRouter)", OPENROUTER_MODEL_DEFAULT),
     ("DeepSeek (OpenRouter)", OPENROUTER_MODEL_DEEPSEEK),
+    ("Gemma (OpenRouter)", OPENROUTER_MODEL_DEFAULT),
 ]
 OPENROUTER_MODEL_OPTIONS = []
 _seen_router_models = set()
@@ -204,12 +205,15 @@ for label, model_id in OPENROUTER_MODEL_OPTIONS:
     llm_options.append((label, f"openrouter::{model_id}"))
 
 llm_labels = [label for label, _ in llm_options]
+# Default to DeepSeek (OpenRouter) if present; otherwise fall back to first option
+default_label = "DeepSeek (OpenRouter)" if any(l == "DeepSeek (OpenRouter)" for l in llm_labels) else llm_labels[0]
+default_index = llm_labels.index(default_label)
 llm_choice_label = st.radio(
     "LLM to use:",
     llm_labels,
-    index=0,
+    index=default_index,
     horizontal=True,
-    help="Offline mode uses the canned pipeline for quick demos. Grok and DeepSeek (OpenRouter) require API keys."
+    help="Offline mode uses the canned pipeline for local dev. DeepSeek (OpenRouter) requires an OPENROUTER_API_KEY."
 )
 llm_choice = next(value for label, value in llm_options if label == llm_choice_label)
 

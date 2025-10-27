@@ -1,162 +1,135 @@
+#
+# New README content below replaces and consolidates outdated sections
+#
+
 # Research Paper Analyzer
 
-*Turn long research PDFs into grounded, structured JSON and an evidence-anchored summary—fast.*
+Convert research PDFs into structured JSON with evidence-backed summaries. Runs locally (offline mock) or with OpenRouter models. The Streamlit app preselects DeepSeek by default; Gemma via OpenRouter is supported with provider-safe fallbacks.
 
-![demo](assets/deepseek.gif) 
+![demo](assets/deepseek.gif)
 
----
+## Overview
+
+This project parses a PDF into pages, extracts task-specific fields using prompt-driven heads (metadata, methods, results, limitations, summary), merges and repairs the output to match a schema, attaches page-level evidence snippets, and presents everything in a Streamlit UI. You can save validated JSON to a local datastore for later viewing.
+
+Core pipeline:
+- Parse PDF → pages/text (no OCR yet)
+- Build lightweight contexts → run heads via LLM or offline mock
+- Merge → repair → attach evidence → validate JSON schema
+- View in UI, download JSON, or save to local datastore
 
 ## Features
 
-* Deterministic ≥0.9 **summary alignment** (no API required); LLM optional for polish
-* Supports **Gemini** and **OpenRouter (DeepSeek)** backends, plus a **Mock** mode
-* Clean **post-processing, confidence scoring, and sidecar metadata** for auditability
+- Streamlit UI with file upload and evidence visualization
+- Head-based extraction: metadata, methods, results, limitations, summary
+- Evidence attachment per section with page/snippet references
+- Automatic structure repair and schema validation (jsonschema + Pydantic)
+- Local datastore for saving and browsing processed papers
+- LLM backends via OpenRouter: DeepSeek (default) and Google Gemma (with safe fallbacks)
+- Offline “MockLLM” mode for quick demos and development without any API key
 
----
+## Tech stack
 
-## Quickstart
+- Python 3.10+
+- Streamlit, Pydantic, jsonschema
+- PDF parsing: PyMuPDF (pymupdf), pdfplumber
+- Matching/heuristics: rapidfuzz, numpy, pandas, scikit-learn (light use)
+- Optional CLI validators/repairs: sentence-transformers, NLTK
 
-```bash
-# 1) Create & activate venv
-python -m venv venv
-source venv/bin/activate       # Linux/Mac
-.\venv\Scripts\activate        # Windows PowerShell
+See full pinned versions in `research-paper-analyzer/requirements.txt`.
 
-# 2) Install deps
-pip install -r requirements.txt
-pip install sentence-transformers rapidfuzz nltk
-python -m nltk.downloader punkt
+## Installation
 
-# 3) Configure keys (optional for LLMs)
-# Create .env in repo root:
-# GEMINI_API_KEY=your_key
-# OPENROUTER_API_KEY=your_key
+Windows PowerShell (recommended):
 
-# 4) Run the app
-streamlit run app/app.py
+```powershell
+# 1) Create and activate a virtual environment
+python -m venv .venv
+.\.venv\Scripts\Activate
+
+# 2) Install dependencies
+pip install -r research-paper-analyzer/requirements.txt
+
+# 3) (Optional) Extra packages for CLI semantic validators/repairs
+pip install sentence-transformers
 ```
-
-Or run the pipeline directly on a sample JSON:
-
-```bash
-# Post-process
-python scripts/postprocess_paper.py examples/example_full.json
-
-# Validate (semantic)
-python scripts/validate_summary_semantic.py examples/example_full.clean.json
-
-# Repair deterministically and re-validate
-python scripts/repair_summary_anchor_semantic.py examples/example_full.clean.json examples/example_full.repaired.json
-python scripts/validate_summary_semantic.py examples/example_full.repaired.json
-```
-
-Expected: alignment score ≥ 0.9 (sample reaches **1.0** after repair).
-
----
-
-## What you get
-
-* **Structured extraction**: metadata, methods, results, datasets/tasks, limitations, summary
-* **Evidence for every claim**: `{ page, snippet }` collections preserved
-* **Confidence**: per-result + aggregate (results mean)
-* **Clean outputs**:
-
-  * `paper.clean.json` — canonicalized, enriched
-  * `paper.meta.json` — sidecar `_meta`
-  * `paper.repaired.json` — summary anchored to evidence
-
----
-
-## Example Metrics (sample run)
-
-| Metric             | Value |
-| ------------------ | ----- |
-| JSON validity      | 98%   |
-| Evidence precision | 92%   |
-| Summary alignment  | 1.0   |
-
-(Values vary by paper; reported for demo JSON)
-
----
-
-## Architecture (file-wise)
-
-* **Ingestion** — `ingestion/parser.py`: PDF → pages/text (born-digital; no OCR yet)
-* **Evidence** — `evidence/locator.py`: find and store `{page, snippet}`
-* **Orchestration** — `orchestrator/pipeline.py`, `orchestrator/heads.py` (+ `prompts/*.txt`):
-
-  * Backends: Gemini, OpenRouter (DeepSeek), Mock
-  * Heads: metadata, methods, results, summary
-* **Schema** — `schema/*.py`, `schema/paper.schema.json`: Pydantic + JSON Schema
-* **Post-process** — `scripts/postprocess_paper.py` + `results/compute_confidence.py`
-* **Validate** — `scripts/validate_summary_semantic.py` (embeddings + fuzzy)
-* **Repair** — `scripts/repair_summary_anchor_semantic.py` (deterministic ≥0.9)
-* **UI** — `app/app.py` (Streamlit)
-* **Examples** — `examples/*.json` (raw/clean/repaired)
-
-📂 Flow: Parse → Extract (LLM) → Merge → Post-process → Validate → Repair → Validate → Serve.
-
----
 
 ## Configuration
 
-* `.env` (optional if using Mock only)
+Copy `.env.example` to `.env` in the repository root if you plan to use OpenRouter models:
 
-  * `GEMINI_API_KEY` — Google Gemini
-  * `OPENROUTER_API_KEY` — OpenRouter (e.g., `deepseek/deepseek-chat`)
+```dotenv
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+OPENROUTER_DEEPSEEK_MODEL=deepseek/deepseek-chat-v3.1:free
+OPENROUTER_MODEL=google/gemma-3n-e4b-it:free
+```
 
-Backend selection happens in the Streamlit UI or in `orchestrator/heads.py`.
+Notes:
+- The UI preselects DeepSeek (OpenRouter). Offline mode works without any keys.
+- Google Gemma via OpenRouter may restrict system/developer instructions and JSON mode; the app includes fallbacks to comply automatically.
 
----
+## Usage
 
-## Deterministic summary alignment (why it matters)
+Run the Streamlit app from the repository root:
 
-We measure **summary-to-evidence grounding** per sentence.
+```powershell
+python -m streamlit run research-paper-analyzer/app/app.py
+```
 
-* Semantic validator: `sentence-transformers` + cosine, with `rapidfuzz` fallback
-* Repair strategy:
+Then open the printed Local URL (for example, http://localhost:8501 or http://localhost:8502).
 
-  * If sentence matches evidence strongly → keep + append `(see pX: "snippet...")`
-  * If weak → replace with best evidence `(pX)`
+In the app:
+- Choose LLM mode: Offline, DeepSeek (OpenRouter), or Gemma (OpenRouter)
+- Upload a PDF (e.g., `sample.pdf` in the root, or any file)
+- Click “Process Paper” to generate and view: summary, repairs, evidence, results table, and full JSON
+- Optionally save to local datastore and reload saved items from the sidebar
 
-Guarantees ≥0.9 alignment without LLMs; use LLM later for style.
+## CLI examples (optional)
 
----
+These utilities live under `research-paper-analyzer/scripts` and require `sentence-transformers` (see Installation step 3).
+
+```powershell
+# Evaluate summary vs evidence (prints alignment score)
+python research-paper-analyzer/scripts/validate_summary_semantic.py research-paper-analyzer/examples/example_full.clean.json
+
+# Repair a summary by anchoring to evidence
+python research-paper-analyzer/scripts/repair_summary_anchor_semantic.py research-paper-analyzer/examples/example_full.clean.json research-paper-analyzer/examples/example_full.repaired.json
+
+# Batch evaluation across a folder of PDFs
+python research-paper-analyzer/scripts/batch_eval.py research-paper-analyzer/pdfs --output research-paper-analyzer/results/batch_eval
+```
+
+## Project layout
+
+```
+assets/                       # demo assets (gif)
+research-paper-analyzer/
+  app/app.py                  # Streamlit UI
+  ingestion/parser.py         # PDF → pages/text
+  orchestrator/               # heads, pipeline, merge, repair
+  evidence/locator.py         # evidence finding/attachment
+  schema/                     # Pydantic models + JSON schema
+  scripts/                    # CLI tools (validation/repair/batch eval)
+  results/                    # evaluation outputs
+  prompts/                    # prompt templates per head
+  datastore/                  # local saved papers (ignored by git)
+```
 
 ## Troubleshooting
 
-* **Activation**:
+- App won’t start: ensure packages are installed into the active virtualenv; try re-running the install step.
+- Gemma 400 errors: provider limitations on developer instructions or JSON mode. The app now auto-avoids system messages and JSON mode for Gemma via OpenRouter.
+- Scanned PDFs: OCR isn’t included; only text-layer PDFs are supported.
+- Cached results: uncheck “Clear cache before running” to reuse cached head outputs.
 
-  * Linux/Mac → `source venv/bin/activate`
-  * Windows → `.\venv\Scripts\activate`
-* **Scanned PDFs**: OCR not enabled. Add Tesseract/pytesseract before ingestion.
-* **Model download slow?** First run only; cached afterward.
-* **Alignment low (<0.9)?** Ensure evidence exists → run repair script → adjust threshold (0.70) for paraphrases.
+## License
 
----
-
-## 📂 Repo Map (selected)
-
-* `app/app.py` — UI
-* `ingestion/parser.py` — PDF parsing
-* `orchestrator/*.py` — pipeline, heads, merge
-* `prompts/*.txt` — head prompts
-* `schema/*.py` — data models
-* `scripts/*.py` — post-process, validate, repair
-* `examples/*.json` — sample outputs
-
----
+MIT — see `research-paper-analyzer/LICENSE` for full terms.
 
 ## Contributing
 
-* Dev setup: create venv, install deps, run tests
-* PRs welcome for:
+Issues and PRs are welcome. For larger changes (e.g., OCR integration, new heads, or additional LLM providers), please open an issue to discuss scope and design first.
+* **Model download slow?** First run only; cached afterward.
 
-  * new metrics
-  * tasks/datasets lexicons
-  * OCR integration
-  * additional LLM backends
-
----
-
+* **Alignment low (<0.9)?** Ensure evidence exists → run repair script → adjust threshold (0.70) for paraphrases.
 

@@ -72,49 +72,14 @@ python scripts/batch_eval.py pdfs --output results/batch_eval
 
 ### Configure
 
-Put keys in `.env` (see `.env.example`). You can switch between **Gemma 3N** and **DeepSeek** (OpenRouter) in the app by setting `OPENROUTER_MODEL`.
+Put keys in `.env` (see `.env.example`). The UI defaults to **DeepSeek (OpenRouter)** now, but you can switch between **DeepSeek** and **Gemma 3N** directly in the app.
 
 Key variables:
-- `OPENROUTER_API_KEY` - required for any Gemma/DeepSeek runs.
+- `OPENROUTER_API_KEY` - required for any OpenRouter runs.
+- `OPENROUTER_DEEPSEEK_MODEL` - DeepSeek model slug (defaults to `deepseek/deepseek-chat-v3.1:free`).
 - `OPENROUTER_MODEL` - Gemma model slug (defaults to `google/gemma-3n-e4b-it:free`).
-- `OPENROUTER_DEEPSEEK_MODEL` - optional alternate slug for DeepSeek comparisons (defaults to `deepseek/deepseek-chat-v3.1:free`).
 
-Example direct OpenRouter call (matches the default Gemma setup):
-
-```python
-import requests
-import json
-
-response = requests.post(
-    "https://openrouter.ai/api/v1/chat/completions",
-    headers={
-        "Authorization": "Bearer <OPENROUTER_API_KEY>",
-        "Content-Type": "application/json",
-        # Optional ranking metadata
-        "HTTP-Referer": "<YOUR_SITE_URL>",
-        "X-Title": "<YOUR_SITE_NAME>",
-    },
-    data=json.dumps({
-        "model": "google/gemma-3n-e4b-it:free",
-        "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": "What is in this image?"},
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg"
-                        },
-                    },
-                ],
-            }
-        ],
-    }),
-)
-```
-
-To hit the new DeepSeek free tier directly, swap the model slug and adjust headers as needed:
+Example direct OpenRouter call (DeepSeek default shown here):
 
 ```python
 import requests
@@ -133,6 +98,30 @@ response = requests.post(
         "model": "deepseek/deepseek-chat-v3.1:free",
         "messages": [
             {"role": "user", "content": "What is the meaning of life?"}
+        ],
+    }),
+)
+```
+
+To hit Gemma directly instead, swap the model slug and adjust any provider-specific constraints as needed:
+
+```python
+import requests
+import json
+
+response = requests.post(
+    "https://openrouter.ai/api/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer <OPENROUTER_API_KEY>",
+        "Content-Type": "application/json",
+        # Optional ranking metadata
+        "HTTP-Referer": "<YOUR_SITE_URL>",
+        "X-Title": "<YOUR_SITE_NAME>",
+    },
+    data=json.dumps({
+        "model": "google/gemma-3n-e4b-it:free",
+        "messages": [
+            {"role": "user", "content": "Summarize the contributions in JSON."}
         ],
     })
 )

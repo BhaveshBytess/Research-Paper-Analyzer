@@ -49,17 +49,69 @@ class OpenRouterLLM:
         prompt = prompt[:3000]
         max_tokens = min(max_tokens, 256)
 
+        # Some providers (e.g., Google AI Studio via OpenRouter) do not allow
+        # developer/system instructions unless explicitly enabled. Gemma 3N free
+        # tier returns: "Developer instruction is not enabled" (400) if we send
+        # a system role. To be safe, we use a user-only message flow for Google models
+        # and otherwise fall back to a retry without system on specific 400s.
+        is_google_model = self.model_id.startswith("google/") or ":google" in self.model_id
+
+        def _create(messages, use_json_mode: bool = True):
+            kwargs = {
+                "model": self.model_id,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            }
+            # Avoid JSON mode for Google AI Studio models (Gemma) unless explicitly supported
+            if use_json_mode:
+                kwargs["response_format"] = {"type": "json_object"}
+            return self.client.chat.completions.create(**kwargs)
+
+        sys_instruction = (
+            "You are a strict JSON generator. Respond with JSON only. "
+            "Do not include code fences, prose, or explanations."
+        )
+
+        messages_system = [
+            {"role": "system", "content": sys_instruction},
+            {"role": "user", "content": prompt},
+        ]
+        messages_user_only = [
+            {
+                "role": "user",
+                "content": f"{sys_instruction}\n\n{prompt}",
+            }
+        ]
+
         try:
-            completion = self.client.chat.completions.create(
-                model=self.model_id,
-                messages=[
-                    {"role": "system", "content": ("You are a strict JSON generator. Respond with JSON only. Do not include code fences, prose, or explanations.")},
-                    {"role": "user", "content": prompt},
-                ],
-                temperature=temperature,
-                max_tokens=max_tokens,
-                response_format={"type": "json_object"},
+            # Prefer user-only AND no JSON mode for Google models to avoid 400s.
+            completion = _create(
+                messages_user_only if is_google_model else messages_system,
+                use_json_mode=not is_google_model,
             )
+        except Exception as first_exc:
+            detail1 = str(first_exc)
+            # If the provider complains about developer/system instructions, retry without system.
+            if "Developer instruction is not enabled" in detail1 or "developer instruction" in detail1.lower():
+                try:
+                    completion = _create(messages_user_only, use_json_mode=False)
+                except Exception:
+                    # If retry also fails, re-raise original with context below.
+                    raise
+            # If provider rejects JSON mode, retry without response_format
+            elif "JSON mode is not enabled" in detail1 or "json mode" in detail1.lower():
+                try:
+                    # Keep the same message flavor we used above
+                    msgs = messages_user_only if is_google_model else messages_system
+                    completion = _create(msgs, use_json_mode=False)
+                except Exception:
+                    raise
+            else:
+                # For other errors, re-raise and handle below.
+                raise
+
+        try:
             message = completion.choices[0].message
             cleaned_text = (message.content or "").strip()
             if not cleaned_text:
@@ -99,6 +151,20 @@ class OpenRouterLLM:
                     cleaned_text = cleaned_text.replace(token, " ")
 
             cleaned_text = cleaned_text.strip()
+
+            # Best-effort: if provider ignored JSON instruction, try to extract a JSON block
+            if cleaned_text and not cleaned_text.lstrip().startswith(('{', '[')):
+                txt = cleaned_text
+                start = txt.find('{')
+                end = txt.rfind('}')
+                if start != -1 and end != -1 and end > start:
+                    candidate = txt[start:end+1]
+                    try:
+                        # Validate it's JSON; if so, return only that chunk
+                        json.loads(candidate)
+                        cleaned_text = candidate
+                    except Exception:
+                        pass
 
             return cleaned_text.strip()
         except Exception as exc:
