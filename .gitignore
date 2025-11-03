@@ -1,8 +1,54 @@
+# Environment
 .env
-.cache/
 .venv/
+venv/
+env/
+
+# Cache
+.cache/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# LLM Response Cache
+.cache/
+research-paper-analyzer/.cache/
+research-paper-analyzer/app/.cache/
+
+# Outputs
 outputs/
-datastore/
 debug-last-run.json
 paper-last-run.json
+
+# Datastore (keep index.json but ignore papers)
+datastore/*.pdf
+datastore/*.json
+!datastore/index.json
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Test artifacts
+test_*.py
+*_test.py
+temp_*
+
+# Build
+dist/
+build/
+*.egg-info/
 
