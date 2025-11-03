@@ -52,3 +52,31 @@ dist/
 build/
 *.egg-info/
 
+# Development documentation (keep in docs/internal/)
+DEPLOYMENT_GUIDE.md
+FINAL_DEPLOYMENT_CHECKLIST.md
+FINAL_HANDOFF_REPORT.md
+FULL_PROJECT_HANDOFF.md
+GITHUB_SETUP.md
+PROJECT_COMPLETION_REPORT.md
+PROJECT_WORKFLOW_SUMMARY.md
+PUSH_COMPLETE.md
+QUICK_REFERENCE.md
+START_HERE.md
+CODEBASE_ANALYSIS.json
+
+# Development scripts
+batch_deepseek_inline.py
+create_visualizations.py
+run_now.py
+
+# Sample files
+sample.pdf
+samples/
+
+# Debug logs
+debug.log
+
+# Batch evaluation results (keep for reference but not in public repo)
+batch_eval_results/
+

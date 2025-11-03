@@ -21,13 +21,23 @@ from orchestrator.repair import Repairer
 from evidence.locator import attach_evidence_for_paper
 from store.store import save_paper, list_papers, load_paper
 
-# Load environment variables from .env file
+# Load environment variables from .env file (local) or Streamlit secrets (deployed)
 load_dotenv()
 
-OPENROUTER_MODEL_DEFAULT = os.environ.get(
+def get_secret(key, default=None):
+    """Get secret from Streamlit secrets (deployed) or environment variable (local)"""
+    try:
+        # Streamlit secrets acts like a dict but needs direct access
+        if key in st.secrets:
+            return st.secrets[key]
+    except:
+        pass
+    return os.environ.get(key, default)
+
+OPENROUTER_MODEL_DEFAULT = get_secret(
     "OPENROUTER_MODEL", "google/gemma-3n-e4b-it:free"
 )
-OPENROUTER_MODEL_DEEPSEEK = os.environ.get(
+OPENROUTER_MODEL_DEEPSEEK = get_secret(
     "OPENROUTER_DEEPSEEK_MODEL", "deepseek/deepseek-chat-v3.1:free"
 )
 # Prefer DeepSeek as the first OpenRouter option by default
@@ -131,14 +141,8 @@ def process_pdf(filepath: str, run_store_save: bool = False, llm_choice: str = "
     debug["steps"].append("running_heads")
     
     if llm_choice.startswith("openrouter::"):
-        # Try Streamlit secrets first, then environment
-        openrouter_api_key = None
-        try:
-            openrouter_api_key = st.secrets.get("OPENROUTER_API_KEY")
-        except:
-            pass
-        if not openrouter_api_key:
-            openrouter_api_key = os.environ.get("OPENROUTER_API_KEY")
+        # Get API key from secrets or environment
+        openrouter_api_key = get_secret("OPENROUTER_API_KEY")
         
         if not openrouter_api_key:
             st.error(
