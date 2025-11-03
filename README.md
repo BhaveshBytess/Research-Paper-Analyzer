@@ -2,7 +2,7 @@
 
 **Automated extraction of structured data from scientific papers with evidence grounding and validation.**
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://research-paper-analyzer.streamlit.app)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://research-paper-analyzer-ack6bpdauvevnlnfbx7gpz.streamlit.app)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -19,7 +19,7 @@
 
 ## 🚀 Live Demo
 
-**Try it now:** [https://research-paper-analyzer.streamlit.app](https://research-paper-analyzer.streamlit.app)
+**Try it now:** [https://research-paper-analyzer-ack6bpdauvevnlnfbx7gpz.streamlit.app](https://research-paper-analyzer-ack6bpdauvevnlnfbx7gpz.streamlit.app)
 
 *Note: Demo uses DeepSeek v3.1 free tier. First run may take 30-60 seconds for model initialization.*
 
@@ -153,7 +153,7 @@ cd research-paper-analyzer
 streamlit run app/app.py
 
 # Or visit the live demo:
-# https://research-paper-analyzer.streamlit.app
+# https://research-paper-analyzer-ack6bpdauvevnlnfbx7gpz.streamlit.app
 ```
 
 **CLI (Single Paper)**
@@ -399,7 +399,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Quick Links
 
-- 🌐 **[Live Demo](https://research-paper-analyzer.streamlit.app)** — Try it in your browser
+- 🌐 **[Live Demo](https://research-paper-analyzer-ack6bpdauvevnlnfbx7gpz.streamlit.app)** — Try it in your browser
 - 📊 [Batch Evaluation Results](batch_eval_results/INDEX.md)
 - 📈 [Visualizations](batch_eval_results/visualizations/)
 - 🧪 [Test Papers](samples/)
