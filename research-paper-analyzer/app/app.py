@@ -131,11 +131,20 @@ def process_pdf(filepath: str, run_store_save: bool = False, llm_choice: str = "
     debug["steps"].append("running_heads")
     
     if llm_choice.startswith("openrouter::"):
-        openrouter_api_key = os.environ.get("OPENROUTER_API_KEY")
+        # Try Streamlit secrets first, then environment
+        openrouter_api_key = None
+        try:
+            openrouter_api_key = st.secrets.get("OPENROUTER_API_KEY")
+        except:
+            pass
+        if not openrouter_api_key:
+            openrouter_api_key = os.environ.get("OPENROUTER_API_KEY")
+        
         if not openrouter_api_key:
             st.error(
-                "OPENROUTER_API_KEY environment variable not set. Cannot use OpenRouter models."
+                "⚠️ OPENROUTER_API_KEY not found. Please set it in Streamlit secrets or as an environment variable."
             )
+            st.info("To use this app with OpenRouter models, add your API key in the Streamlit Cloud dashboard under 'Secrets'.")
             st.stop()
         model_id = llm_choice.split("::", 1)[1]
         llm_client = OpenRouterLLM(api_key=openrouter_api_key, model_id=model_id)

@@ -1,0 +1,399 @@
+{
+  "directory_overview": {
+    "project_root": "RESEARCH-PAPER-ANALYZER",
+    "top_level_structure": {
+      "research-paper-analyzer/": "Main application code - core pipeline modules",
+      "batch_eval_results/": "Evaluation outputs - per-paper metrics, visualizations, summaries",
+      "samples/": "Test PDFs - research papers for batch evaluation",
+      "scripts/": "Utility scripts (empty - cleanup candidate)",
+      "docs/": "Documentation - ARCHITECTURE.md",
+      "assets/": "Media files - demo GIFs for README",
+      "datastore/": "Paper storage - saved extraction results with timestamps",
+      "venv/": "Virtual environment - Python dependencies",
+      ".streamlit/": "Streamlit configuration - config.toml, secrets.toml"
+    },
+    "key_modules": {
+      "app/": {
+        "description": "Streamlit web interface",
+        "files": ["app.py"],
+        "purpose": "User-facing UI for PDF upload, model selection, extraction triggering"
+      },
+      "ingestion/": {
+        "description": "PDF parsing and text extraction",
+        "files": ["parser.py"],
+        "purpose": "Convert PDF to structured pages with clean text and layout blocks"
+      },
+      "orchestrator/": {
+        "description": "LLM orchestration and pipeline management",
+        "files": ["heads.py", "pipeline.py", "merge.py", "repair.py"],
+        "purpose": "Coordinate LLM calls, merge outputs, repair malformed JSON"
+      },
+      "schema/": {
+        "description": "Data models and validation schemas",
+        "files": ["models.py", "head_models.py", "paper.schema.json"],
+        "purpose": "Define Pydantic models (Paper, Dataset, Method, etc.) and JSONSchema"
+      },
+      "evidence/": {
+        "description": "Evidence attachment and grounding",
+        "files": ["locator.py"],
+        "purpose": "Fuzzy match extracted claims to PDF text snippets with page numbers"
+      },
+      "validation/": {
+        "description": "Schema validation",
+        "files": ["schema_validator.py"],
+        "purpose": "Validate Paper JSON against JSONSchema, return error list"
+      },
+      "eval/": {
+        "description": "Evaluation metrics",
+        "files": ["eval_metrics.py", "gold/"],
+        "purpose": "Compute 5 core metrics (JSON validity, evidence precision, field coverage, numeric consistency, summary alignment)"
+      },
+      "store/": {
+        "description": "Paper persistence",
+        "files": ["store.py", "embeddings.py"],
+        "purpose": "Save/load papers with timestamps, future embedding support"
+      },
+      "prompts/": {
+        "description": "LLM prompts",
+        "files": ["metadata.txt", "methods.txt", "results.txt", "limitations.txt", "summary.txt"],
+        "purpose": "Prompt templates for each extraction head"
+      }
+    },
+    "key_file_types": {
+      ".py": "Python source code - 15+ modules implementing pipeline logic",
+      ".json": "Data files - schemas, paper outputs, evaluation results",
+      ".md": "Documentation - README, CONTRIBUTING, PROJECT_COMPLETION_REPORT, etc.",
+      ".txt": "Prompt templates - LLM instructions for each head",
+      ".csv/.jsonl": "Evaluation logs - per-paper metrics in tabular format",
+      ".toml": "Configuration - Streamlit config and secrets",
+      ".pdf": "Test data - sample research papers"
+    }
+  },
+  "workflow_map": {
+    "entry_points": {
+      "streamlit_ui": {
+        "file": "research-paper-analyzer/app/app.py",
+        "command": "streamlit run research-paper-analyzer/app/app.py",
+        "triggers": "User uploads PDF via Streamlit interface"
+      },
+      "batch_evaluation": {
+        "file": "batch_deepseek_inline.py",
+        "command": "python batch_deepseek_inline.py",
+        "triggers": "Processes multiple papers sequentially with evaluation metrics"
+      },
+      "visualization_generation": {
+        "file": "create_visualizations.py",
+        "command": "python create_visualizations.py",
+        "triggers": "Generates charts from batch_eval_results/results.csv"
+      }
+    },
+    "end_to_end_flow": {
+      "step_1_ingestion": {
+        "module": "ingestion.parser",
+        "function": "parse_pdf_to_pages(filepath)",
+        "input": "PDF file path",
+        "output": "{'pages': [{'page_no': int, 'raw_text': str, 'blocks': list, 'clean_text': str}]}",
+        "dependencies": ["PyMuPDF (fitz)", "pdfplumber"]
+      },
+      "step_2_context_building": {
+        "module": "app.app",
+        "function": "run_extraction_pipeline() - inline context building",
+        "input": "Parsed pages dict",
+        "output": "{'metadata': str, 'methods': str, 'results': str, 'limitations': str, 'summary': str}",
+        "logic": "Clips text from strategic pages (first, middle, last, last 2) with char limits per context"
+      },
+      "step_3_llm_heads": {
+        "module": "orchestrator.pipeline",
+        "function": "Pipeline.run(contexts)",
+        "input": "5 context strings",
+        "output": "{'metadata': MetadataOutput, 'methods': MethodsOutput, 'results': ResultsOutput, 'limitations': LimitationsOutput, 'summary': SummaryOutput}",
+        "dependencies": ["orchestrator.heads.HeadRunner", "OpenRouter API (DeepSeek/Gemma)"],
+        "caching": "Hash-based caching in .cache/ dir prevents redundant API calls"
+      },
+      "step_4_merge": {
+        "module": "orchestrator.merge",
+        "function": "merge_heads_to_paper(heads_dict, pages)",
+        "input": "5 head outputs + original pages",
+        "output": "Paper (Pydantic model)",
+        "logic": "Combines all head outputs into single Paper model with default values for missing fields"
+      },
+      "step_5_repair": {
+        "module": "orchestrator.repair",
+        "function": "Repairer.repair(broken_paper_dict)",
+        "input": "Potentially malformed Paper dict",
+        "output": "Repaired Paper dict",
+        "logic": "Fixes common JSON issues (quotes, braces, trailing commas), retries validation"
+      },
+      "step_6_evidence": {
+        "module": "evidence.locator",
+        "function": "attach_evidence_for_paper(paper, pages)",
+        "input": "Paper model + parsed pages",
+        "output": "Paper model with evidence dict populated",
+        "logic": "Fuzzy matches extracted claims to PDF text, records (page, snippet) pairs"
+      },
+      "step_7_validation": {
+        "module": "validation.schema_validator",
+        "function": "validate_with_jsonschema(paper_dict)",
+        "input": "Paper dict",
+        "output": "List of validation errors (empty if valid)",
+        "dependencies": ["schema/paper.schema.json"]
+      },
+      "step_8_storage": {
+        "module": "store.store",
+        "function": "save_paper(paper_id, paper_dict)",
+        "input": "Paper ID + Paper dict",
+        "output": "Saved JSON file in datastore/ with timestamp",
+        "format": "datastore/{paper_id}.json"
+      }
+    },
+    "module_dependencies": {
+      "app.app": ["ingestion.parser", "orchestrator.heads", "orchestrator.pipeline", "orchestrator.repair", "evidence.locator", "store.store"],
+      "orchestrator.pipeline": ["orchestrator.heads", "orchestrator.merge"],
+      "orchestrator.heads": ["schema.head_models", "openai (OpenRouter client)", "dotenv"],
+      "orchestrator.merge": ["schema.models"],
+      "evidence.locator": ["rapidfuzz (optional)", "difflib"],
+      "eval.eval_metrics": ["validation.schema_validator", "store.store", "rapidfuzz (optional)", "nltk"],
+      "batch_deepseek_inline.py": ["All modules above + eval.eval_metrics"]
+    },
+    "external_dependencies": {
+      "openrouter_api": {
+        "url": "https://openrouter.ai/api/v1",
+        "models_used": ["deepseek/deepseek-chat-v3.1:free", "google/gemma-3n-e4b-it:free"],
+        "authentication": "API key via OPENROUTER_API_KEY env var or Streamlit secrets",
+        "rate_limits": "Free tier - limited requests per day",
+        "usage": "All LLM generation calls go through OpenRouterLLM wrapper"
+      },
+      "pdf_libraries": {
+        "pymupdf": "Primary PDF parser - fast, extracts text + layout blocks",
+        "pdfplumber": "Fallback parser - better for tables (not currently used)"
+      },
+      "validation_libraries": {
+        "pydantic": "Runtime validation of Python models",
+        "jsonschema": "Schema validation against paper.schema.json"
+      },
+      "ui_framework": {
+        "streamlit": "Web UI framework - handles file uploads, model selection, output display"
+      }
+    },
+    "data_flow_diagram": {
+      "ascii_representation": "PDF → [Parser] → Pages → [Context Builder] → Contexts → [LLM Heads] → Head Outputs → [Merge] → Paper → [Repair] → Valid Paper → [Evidence] → Grounded Paper → [Validate] → JSON → [Store] → Saved File"
+    }
+  },
+  "module_details": [
+    {
+      "module_name": "ingestion.parser",
+      "what_it_does": "Parses PDF files into structured page-level text data",
+      "inputs": "PDF file path (str)",
+      "outputs": "{'pages': list[dict], 'total_pages': int, 'total_text_len': int, 'method': 'pymupdf'}",
+      "key_functions": [
+        "parse_pdf_to_pages(path, save_json, out_dir): Main entry point",
+        "parse_with_pymupdf(path): Primary parser using PyMuPDF",
+        "blocks_from_pymupdf_page(page): Extracts text blocks with bounding boxes",
+        "clean_text_whitespace(s): Normalizes whitespace and newlines"
+      ],
+      "transformations": "PDF bytes → PyMuPDF Document → Pages with blocks → Clean text per page",
+      "error_handling": "Falls back to raw text if block extraction fails; returns None if PDF cannot be opened"
+    },
+    {
+      "module_name": "orchestrator.heads",
+      "what_it_does": "Manages LLM clients and executes individual extraction heads",
+      "inputs": "Context text (str) + head name (str)",
+      "outputs": "Pydantic model (MetadataOutput, MethodsOutput, etc.) containing structured extraction",
+      "key_classes": [
+        "OpenRouterLLM: Wrapper for OpenRouter API with model switching",
+        "HeadRunner: Orchestrates calls to different heads (metadata, methods, results, limitations, summary)"
+      ],
+      "key_functions": [
+        "OpenRouterLLM.generate(prompt, temperature, max_tokens): Calls LLM and returns JSON string",
+        "HeadRunner.run_metadata/methods/results/limitations/summary(context): Executes specific head"
+      ],
+      "transformations": "Text context → Prompt template + context → LLM API call → JSON response → Pydantic model",
+      "error_handling": "Retries with user-only messages if system messages fail (Google AI Studio compatibility); raises LLMGenerationError on failure"
+    },
+    {
+      "module_name": "orchestrator.pipeline",
+      "what_it_does": "Coordinates async execution of all heads with caching",
+      "inputs": "{'metadata': str, 'methods': str, 'results': str, 'limitations': str, 'summary': str}",
+      "outputs": "{'metadata': MetadataOutput, 'methods': MethodsOutput, 'results': ResultsOutput, 'limitations': LimitationsOutput, 'summary': SummaryOutput}",
+      "key_functions": [
+        "Pipeline.run(contexts): Main entry point - runs all heads asynchronously",
+        "_run_head_cached(head_name, call_fn, context): Wraps head execution with caching",
+        "_hash_key(head_name, context_text): Generates cache key from head + context",
+        "_cache_path_for_key(key): Returns path to cached result"
+      ],
+      "transformations": "Contexts dict → 5 async head calls → Cached/fresh results → Merged dict",
+      "caching_strategy": "SHA256 hash of (head_name + context) → .cache/{hash}.json; skips LLM call if cache exists"
+    },
+    {
+      "module_name": "orchestrator.merge",
+      "what_it_does": "Merges head outputs into single Paper model",
+      "inputs": "Head outputs dict + pages dict",
+      "outputs": "Paper (Pydantic model)",
+      "key_functions": [
+        "merge_heads_to_paper(heads, pages): Combines all head outputs"
+      ],
+      "transformations": "5 separate head models → Single Paper model with all fields populated",
+      "default_values": "Empty lists for methods/results/datasets, empty strings for optional text fields"
+    },
+    {
+      "module_name": "orchestrator.repair",
+      "what_it_does": "Attempts to fix malformed JSON from LLM responses",
+      "inputs": "Broken Paper dict",
+      "outputs": "Repaired Paper dict",
+      "key_functions": [
+        "Repairer.repair(paper_dict): Main entry point",
+        "_attempt_json_repair(text): Fixes quotes, braces, trailing commas"
+      ],
+      "transformations": "Malformed JSON string → Regex-based fixes → Valid JSON → Pydantic validation",
+      "limitations": "Can only fix simple syntax errors; complex issues may still fail"
+    },
+    {
+      "module_name": "evidence.locator",
+      "what_it_does": "Attaches page-level evidence to extracted claims",
+      "inputs": "Paper model + pages dict",
+      "outputs": "Paper model with evidence dict populated",
+      "key_functions": [
+        "attach_evidence_for_paper(paper, pages): Main entry point",
+        "_find_snippets_for_value(value, pages, max_snippets): Fuzzy matches value to PDF text"
+      ],
+      "transformations": "Extracted claim → Key phrases → Fuzzy search in pages → Top N matches → (page, snippet) pairs",
+      "fuzzy_matching": "Uses rapidfuzz if available (faster), else difflib.SequenceMatcher; threshold 80% similarity"
+    },
+    {
+      "module_name": "validation.schema_validator",
+      "what_it_does": "Validates Paper JSON against JSONSchema",
+      "inputs": "Paper dict",
+      "outputs": "List of validation error strings",
+      "key_functions": [
+        "validate_with_jsonschema(paper_dict): Loads schema and validates"
+      ],
+      "schema_location": "schema/paper.schema.json",
+      "validation_rules": "Required fields: title, authors, year, summary, evidence; type checking for all fields"
+    },
+    {
+      "module_name": "eval.eval_metrics",
+      "what_it_does": "Computes 5 evaluation metrics for extracted papers",
+      "inputs": "Gold Paper dict + Predicted Paper dict",
+      "outputs": "Metrics dict with scores and details",
+      "key_functions": [
+        "evaluate_pair(gold, pred, fuzzy_threshold): Computes all 5 metrics",
+        "field_coverage(gold, pred): Checks if core fields are present",
+        "evidence_precision_for_paper(gold, pred): Fuzzy matches evidence snippets",
+        "numeric_consistency_check(paper): Validates internal consistency of results",
+        "token_f1(gold_text, pred_text): Token-level F1 for summary comparison"
+      ],
+      "metrics": [
+        "JSON Validity: validate_with_jsonschema returns empty list",
+        "Evidence Precision: (matched_snippets / total_gold_snippets)",
+        "Field Coverage: (present_core_fields / 7)",
+        "Numeric Consistency: (passed_checks / total_checks) - baseline comparisons, value ranges, unit consistency",
+        "Summary Alignment: Token-level F1 between gold and predicted summary"
+      ]
+    },
+    {
+      "module_name": "store.store",
+      "what_it_does": "Saves and loads Paper JSON files with timestamps",
+      "inputs": "Paper ID + Paper dict",
+      "outputs": "Saved JSON file in datastore/",
+      "key_functions": [
+        "save_paper(paper_id, paper_dict): Saves with timestamp",
+        "load_paper(paper_id): Loads from datastore/",
+        "list_papers(): Returns list of all saved paper IDs"
+      ],
+      "storage_format": "datastore/{paper_id}.json with metadata field containing timestamp"
+    }
+  ],
+  "noted_gaps": [
+    {
+      "category": "OCR Support",
+      "description": "Scanned PDFs are not supported - only native text PDFs work",
+      "impact": "Cannot process older papers or papers with embedded images containing text",
+      "suggested_fix": "Integrate Tesseract OCR as fallback when PyMuPDF returns empty text"
+    },
+    {
+      "category": "Summary Quality",
+      "description": "Summary alignment scores vary widely (0%-100%); some papers have very low scores",
+      "impact": "Generated summaries may not accurately capture paper content",
+      "suggested_fix": "Improve summary prompt with more specific instructions; consider fine-tuned model"
+    },
+    {
+      "category": "Evidence Fuzzy Matching",
+      "description": "Fuzzy matching threshold (80%) may be too strict or too loose for some papers",
+      "impact": "Some valid evidence may be missed or some invalid evidence may be included",
+      "suggested_fix": "Make threshold configurable per paper type; use multiple thresholds and rank by confidence"
+    },
+    {
+      "category": "Error Recovery",
+      "description": "If LLM repeatedly fails (quota, API error), pipeline stops with no retry logic",
+      "impact": "Batch processing may fail mid-way and require manual restart",
+      "suggested_fix": "Implement exponential backoff retry logic; save checkpoint after each paper"
+    },
+    {
+      "category": "Multi-Paper Analysis",
+      "description": "No support for comparing multiple papers or analyzing citation networks",
+      "impact": "Cannot answer questions like 'Which papers use similar methods?' or 'What's the citation graph?'",
+      "suggested_fix": "Add comparison module that clusters papers by methods/results; extract citations from references"
+    },
+    {
+      "category": "Manual Correction UI",
+      "description": "No UI for human-in-the-loop correction of extraction errors",
+      "impact": "Users cannot easily fix mistakes without editing JSON manually",
+      "suggested_fix": "Add Streamlit page with editable fields and validation feedback"
+    },
+    {
+      "category": "Numeric Validation Clarity",
+      "description": "Numeric consistency checker is comprehensive but error messages could be more actionable",
+      "impact": "Users may not understand why a consistency check failed",
+      "suggested_fix": "Add detailed explanations and suggested fixes to each error message"
+    }
+  ],
+  "immediate_suggestions": [
+    {
+      "priority": "HIGH",
+      "suggestion": "Add checkpoint saving to batch evaluation",
+      "reason": "Prevents loss of progress if API quota is reached mid-batch",
+      "implementation": "Save progress.json after each paper with last_completed_paper and remaining_papers list"
+    },
+    {
+      "priority": "HIGH",
+      "suggestion": "Improve summary prompt quality",
+      "reason": "Summary alignment scores are inconsistent (0%-100%); many papers have low scores",
+      "implementation": "Add specific instructions to prompts/summary.txt about key elements to include (methods, results, novelty)"
+    },
+    {
+      "priority": "MEDIUM",
+      "suggestion": "Add API key validation on startup",
+      "reason": "Currently fails mid-extraction if API key is invalid; wastes time parsing PDF first",
+      "implementation": "Add test API call in app.py before file upload; show warning if key is missing/invalid"
+    },
+    {
+      "priority": "MEDIUM",
+      "suggestion": "Make evidence fuzzy threshold configurable",
+      "reason": "Different paper types may need different matching strictness",
+      "implementation": "Add slider in Streamlit UI for fuzzy_threshold (60-95%)"
+    },
+    {
+      "priority": "LOW",
+      "suggestion": "Add progress indicators for long-running extractions",
+      "reason": "Users see blank screen for 15-30 seconds; unclear if processing or hung",
+      "implementation": "Use st.progress() to show 'Parsing PDF... Running heads... Attaching evidence...'"
+    },
+    {
+      "priority": "LOW",
+      "suggestion": "Create REST API wrapper for programmatic access",
+      "reason": "Enables integration with other tools (arXiv scrapers, citation managers)",
+      "implementation": "Add FastAPI wrapper around run_extraction_pipeline with /extract endpoint"
+    }
+  ],
+  "metadata": {
+    "analysis_date": "2025-11-03",
+    "total_modules": 15,
+    "total_functions": 50,
+    "total_lines_of_code": 3500,
+    "test_coverage": "Partial - schema validation tested, metrics tested, no unit tests for individual modules",
+    "documentation_completeness": "High - README, CONTRIBUTING, ARCHITECTURE, PROJECT_WORKFLOW_SUMMARY all present",
+    "code_quality": "Good - consistent style, type hints in most places, docstrings in key functions",
+    "deployment_status": "Live on Streamlit Cloud",
+    "open_issues": 7
+  }
+}
