@@ -1,0 +1,11 @@
+paper_id,filename,timestamp,json_validity,evidence_precision,field_coverage,numeric_consistency,summary_alignment,notes
+2502.00401v2,2502.00401v2.pdf,2025-11-02T21:00:14.123989+00:00,1.0,1.0,1.0,1.0,0.6666666666666666,
+2509.21117v1,2509.21117v1.pdf,2025-11-02T21:00:27.250405+00:00,1.0,0.4,1.0,1.0,0.0,
+2509.21266v1,2509.21266v1.pdf,2025-11-02T21:03:57.851579+00:00,1.0,0.6,1.0,1.0,0.6666666666666666,
+boosting-the-performance-of-deployable-timestamped-directed-gnns-via-time-relaxed-sampling,boosting-the-performance-of-deployable-timestamped-directed-gnns-via-time-relaxed-sampling.pdf,2025-11-02T21:04:43.744975+00:00,1.0,0.8,1.0,1.0,0.75,
+graph-model-explainer-tool,graph-model-explainer-tool.pdf,2025-11-02T21:05:03.265918+00:00,1.0,0.8,1.0,1.0,0.25,
+spottarget-rethinking-the-effect-of-target-edges-for-link-prediction-in-graph-neural-networks,spottarget-rethinking-the-effect-of-target-edges-for-link-prediction-in-graph-neural-networks.pdf,2025-11-03T10:12:52.171754+00:00,1.0,1.0,1.0,1.0,0.5,
+TIMEBASED,TIMEBASED.pdf,2025-11-03T10:13:04.698245+00:00,1.0,1.0,1.0,1.0,1.0,
+2509.21291v1,2509.21291v1.pdf,2025-11-03T10:14:05.571420+00:00,1.0,1.0,1.0,1.0,0.6666666666666666,
+NIPS-2017-attention-is-all-you-need-Paper,NIPS-2017-attention-is-all-you-need-Paper.pdf,2025-11-03T10:24:12.698945+00:00,1.0,0.6,1.0,1.0,0.3333333333333333,
+gsampler-general-and-efficient-gpu-based-graph-sampling-for-graph-learning,gsampler-general-and-efficient-gpu-based-graph-sampling-for-graph-learning.pdf,2025-11-02T21:05:12.041551+00:00,1.0,0.8,1.0,1.0,1.0,

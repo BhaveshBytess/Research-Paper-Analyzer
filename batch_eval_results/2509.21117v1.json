@@ -1,0 +1,98 @@
+{
+  "title": "TRUSTJUDGE: INCONSISTENCIES OF LLM-AS-A-JUDGE AND HOW TO ALLEVIATE THEM",
+  "authors": [
+    "Yidong Wang",
+    "Yunze Song",
+    "Tingyuan Zhu",
+    "Xuanwang Zhang",
+    "Zhuohao Yu",
+    "Hao Chen",
+    "Cunxiang Wang",
+    "Zhen Wu",
+    "Xinyu Dai",
+    "Yue Zhang",
+    "Wei Ye",
+    "Shikun Zhang",
+    "Qiufeng Wang"
+  ],
+  "year": 2025,
+  "venue": null,
+  "arxiv_id": "arXiv:2509.21117v1",
+  "methods": [
+    {
+      "name": "TrustJudge",
+      "category": "Other",
+      "components": [],
+      "description": "PPL-based confidence distribution framework for reducing uncertainty in judgment systems."
+    },
+    {
+      "name": "Score-Comparison",
+      "category": "Other",
+      "components": [],
+      "description": "A method for evaluating model outputs through pairwise comparisons."
+    }
+  ],
+  "results": [
+    {
+      "dataset": "TrustJudge",
+      "metric": "Accuracy",
+      "value": 92.0,
+      "unit": "%",
+      "split": null,
+      "higher_is_better": true,
+      "baseline": null,
+      "ours_is": null,
+      "confidence": null
+    }
+  ],
+  "limitations": "Evaluation limited to small datasets.",
+  "ethics": null,
+  "summary": "We introduce TRUSTJUDGE, a framework addressing inconsistencies in LLM-as-a-judge evaluations. By introducing a novel cyclic invariance principle, it ensures that evaluation scores remain consistent across swapped query orders, i.e., the score for 'Rx ≻ Ry' under one ordering equals the score for 'Ry ≻ Rx' under the reversed order. This is formally proven as m(1; Rx, Ry) = m(-1; Ry, Rx), and similarly for other cases, leading to the conclusion that the estimated comparative bias (CB) satisfies CB(Rx, Ry) = -CB(Ry, Rx). The method is validated through extensive experiments on synthetic and real-world datasets.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "evidence": {
+    "title": [
+      {
+        "page": 1,
+        "snippet": "TRUSTJUDGE: INCONSISTENCIES OF LLM-AS-A- JUDGE AND HOW TO ALLEVIATE THEM"
+      }
+    ],
+    "methods": [
+      {
+        "page": 1,
+        "snippet": "TRUSTJUDGE: INCONSISTENCIES OF LLM-AS-A- JUDGE AND HOW TO ALLEVIATE THEM"
+      },
+      {
+        "page": 1,
+        "snippet": "ed critical inconsistencies in current evaluation frameworks. We identify two fundamental types of inconsistencies: (1) Score-Comparison Inconsistency, where lower-rated responses outperform higher-scored ones in pair- wise comparisons, and (2) Pairwise Tr"
+      }
+    ]
+  },
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null,
+  "_meta": {
+    "repair_log": [],
+    "evidence_report": {
+      "found": 3,
+      "missing": 3,
+      "details": {
+        "title": true,
+        "methods": [
+          true,
+          true
+        ],
+        "results": [
+          false
+        ],
+        "limitations": false,
+        "summary": false
+      },
+      "evidence_precision": 0.5
+    }
+  }
+}

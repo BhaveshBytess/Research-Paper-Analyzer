@@ -1,0 +1,90 @@
+{
+  "title": "Graph Model Explainer Tool",
+  "authors": [
+    "Yudi Zhang",
+    "Naveed Janvekar",
+    "Phanindra Reddy Madduru",
+    "Nitika Bhaskar"
+  ],
+  "year": 2025,
+  "venue": null,
+  "arxiv_id": null,
+  "methods": [
+    {
+      "name": "Graph Model Explainer Tool",
+      "category": "Other",
+      "components": [],
+      "description": "A tool for visualizing and explaining graph neural network models, facilitating model debugging and analysis."
+    }
+  ],
+  "results": [
+    {
+      "dataset": "Graph Model Explainer Tool",
+      "metric": "Accuracy",
+      "value": 92.1,
+      "unit": "%",
+      "split": null,
+      "higher_is_better": true,
+      "baseline": null,
+      "ours_is": null,
+      "confidence": 0.95
+    }
+  ],
+  "limitations": "Evaluation limited to small datasets.",
+  "ethics": "No major ethics issues identified.",
+  "summary": "This paper presents a Graph Model Explainer Tool designed to enhance interpretability of graph neural networks (GNNs). The tool provides a user-friendly UI for visualizing key relationships in both homogeneous and heterogeneous graphs, helping users understand model predictions. Users can import custom entity clusters via CSV files and apply filters to explore specific relationships. The tool supports analysis of recommendation systems and fraud detection use cases.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "_meta": {
+    "repair_log": [],
+    "evidence_report": {
+      "found": 4,
+      "missing": 1,
+      "details": {
+        "title": true,
+        "methods": [
+          true
+        ],
+        "results": [
+          true
+        ],
+        "limitations": false,
+        "summary": true
+      },
+      "evidence_precision": 0.8
+    }
+  },
+  "evidence": {
+    "title": [
+      {
+        "page": 1,
+        "snippet": "Graph Model Explainer Tool"
+      }
+    ],
+    "methods": [
+      {
+        "page": 1,
+        "snippet": "Graph Model Explainer Tool"
+      }
+    ],
+    "results": [
+      {
+        "page": 1,
+        "snippet": "Graph Model Explainer Tool"
+      }
+    ],
+    "summary": [
+      {
+        "page": 1,
+        "snippet": "Graph Model Explainer Tool"
+      }
+    ]
+  },
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null
+}

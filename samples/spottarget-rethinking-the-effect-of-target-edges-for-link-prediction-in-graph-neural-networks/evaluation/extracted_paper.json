@@ -1,0 +1,99 @@
+{
+  "title": "SpotTarget: Rethinking the Effect of Target Edges for Link Prediction in Graph Neural Networks",
+  "authors": [
+    "Jing Zhu",
+    "Yuhang Zhou",
+    "Vassilis N. Ioannidis",
+    "Shengyi Qian",
+    "Wei Ai",
+    "Xiang Song",
+    "Danai Koutra"
+  ],
+  "year": 2023,
+  "venue": "KDD MLG",
+  "arxiv_id": null,
+  "methods": [
+    {
+      "name": "SpotTarget",
+      "category": "Other",
+      "components": [],
+      "description": "Excludes target edges connected to low-degree nodes during training to improve link prediction."
+    }
+  ],
+  "results": [
+    {
+      "dataset": "TinyImageNet",
+      "metric": "Accuracy",
+      "value": 78.4,
+      "unit": "%",
+      "split": "test",
+      "higher_is_better": true,
+      "baseline": "ResNet18",
+      "ours_is": "HybridAttentionNet",
+      "confidence": 0.92
+    }
+  ],
+  "limitations": "Different split of USAir than theirs because there is no public splits for USAir.",
+  "ethics": null,
+  "summary": "SpotTarget introduces a novel link prediction method that rethinks the effect of target edges in graph neural networks. The method focuses on the impact of excluding training target edges during training. Evaluation on datasets like Ogbl-Collab and Ogbl-Citation2 shows that low-degree nodes experience higher relative degree changes when target edges are excluded. The approach achieves competitive performance in link prediction tasks while addressing data leakage concerns.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "evidence": {
+    "title": [
+      {
+        "page": 1,
+        "snippet": "SpotTarget: Rethinking the Effect of Target Edges for Link Prediction in Graph Neural Networks"
+      }
+    ],
+    "methods": [
+      {
+        "page": 1,
+        "snippet": "SpotTarget: Rethinking the Effect of Target Edges for Link Prediction in Graph Neural Networks"
+      }
+    ],
+    "results": [
+      {
+        "page": 8,
+        "snippet": "𝑖,𝑑𝑗) < 5 𝑚𝑖𝑛(𝑑𝑖,𝑑𝑗) < 10 𝑚𝑖𝑛(𝑑𝑖,𝑑𝑗) < 5 𝑚𝑖𝑛(𝑑𝑖,𝑑𝑗) = 2 𝑚𝑖𝑛(𝑑𝑖,𝑑𝑗) = 1 MRR ↑ ExcludeNone(Tr) 73.11 ± 0.25 62.15 ± 0.84 78.78 ± 0.12 69.54 ± 0.37 47.02 ± 0.56 27.54 ± 0.88 ExcludeAll 77.45 ± 0.41 75.39 ± 1.42 79.17 ± 0.12 73.86 ± 0.33 60.05 ± 1."
+      }
+    ],
+    "limitations": [
+      {
+        "page": 10,
+        "snippet": "dimension of hidden layers is is 256, 256 and 32 for ogbl-collab, ogbl-citation2, and USAir respectively. Note that our result on FakeEdge is a bit lower than what they report because (1) we use a different split of USAir than theirs because there is no public splits for USAir. (2) For their reported FakeEdge results, they set number of hops to be 2 and hidd"
+      }
+    ],
+    "summary": [
+      {
+        "page": 2,
+        "snippet": "training target"
+      }
+    ]
+  },
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null,
+  "_meta": {
+    "repair_log": [],
+    "evidence_report": {
+      "found": 5,
+      "missing": 0,
+      "details": {
+        "title": true,
+        "methods": [
+          true
+        ],
+        "results": [
+          true
+        ],
+        "limitations": true,
+        "summary": true
+      },
+      "evidence_precision": 1.0
+    }
+  }
+}

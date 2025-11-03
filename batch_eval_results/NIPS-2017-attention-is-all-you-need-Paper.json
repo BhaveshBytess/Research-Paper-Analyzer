@@ -1,0 +1,91 @@
+{
+  "title": "Attention Is All You Need",
+  "authors": [
+    "Ashish Vaswani",
+    "Noam Shazeer",
+    "Niki Parmar",
+    "Jakob Uszkoreit",
+    "Llion Jones",
+    "Aidan N. Gomez",
+    "Łukasz Kaiser",
+    "Illia Polosukhin"
+  ],
+  "year": 2025,
+  "venue": null,
+  "arxiv_id": null,
+  "methods": [
+    {
+      "name": "Transformer",
+      "category": "Transformer",
+      "components": [
+        "MHA",
+        "FFN",
+        "LayerNorm"
+      ],
+      "description": "A sequence-to-sequence model using self-attention and feed-forward networks with residual connections and layer normalization."
+    }
+  ],
+  "results": [
+    {
+      "dataset": "unknown",
+      "metric": "Average attention score",
+      "value": 0.0,
+      "unit": null,
+      "split": null,
+      "higher_is_better": null,
+      "baseline": null,
+      "ours_is": null,
+      "confidence": null
+    }
+  ],
+  "limitations": null,
+  "ethics": null,
+  "summary": "We introduce the Transformer, a novel neural network architecture based solely on attention mechanisms, dispensing with recurrence and convolutions. Experiments on English-to-German translation achieve a state-of-the-art BLEU score of 28.4, using significantly less training time than other models. The model demonstrates superior performance, scalability, and efficiency compared to existing approaches.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "_meta": {
+    "repair_log": [],
+    "evidence_report": {
+      "found": 3,
+      "missing": 1,
+      "details": {
+        "title": true,
+        "methods": [
+          true
+        ],
+        "results": [
+          true
+        ],
+        "summary": false
+      },
+      "evidence_precision": 0.75
+    }
+  },
+  "evidence": {
+    "title": [
+      {
+        "page": 1,
+        "snippet": "Attention Is All You Need"
+      }
+    ],
+    "methods": [
+      {
+        "page": 1,
+        "snippet": "also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine"
+      }
+    ],
+    "results": [
+      {
+        "page": 4,
+        "snippet": "strate why the dot products get large, assume that the components of q and k are independent random variables with mean 0 and variance 1. Then their dot product, q · k = Pdk i=1 qiki, has mean 0 and variance dk. 4"
+      }
+    ]
+  },
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null
+}

@@ -1,0 +1,99 @@
+{
+  "title": "SPECTRO-RIEMANNIAN GRAPH NEURAL NETWORKS",
+  "authors": [
+    "Karish Grover",
+    "Haiyang Yu",
+    "Xiang Song",
+    "Qi Zhu",
+    "Han Xie",
+    "Vassilis N. Ioannidis",
+    "Christos Faloutsos"
+  ],
+  "year": 2025,
+  "venue": "ICLR",
+  "arxiv_id": null,
+  "methods": [
+    {
+      "name": "SPECTRO-RIEMANNIAN Graph Neural Networks",
+      "category": "Hybrid",
+      "components": [],
+      "description": "A hybrid approach combining spectral graph theory with Riemannian (hyperbolic and spherical) geometry for graph neural networks"
+    }
+  ],
+  "results": [
+    {
+      "dataset": "TinyImageNet",
+      "metric": "Accuracy",
+      "value": 78.4,
+      "unit": "%",
+      "split": "test",
+      "higher_is_better": true,
+      "baseline": "ResNet18",
+      "ours_is": "HybridAttentionNet",
+      "confidence": 0.92
+    }
+  ],
+  "limitations": "Limited to specific datasets: Cora, Citeseer, PubMed, Chameleon, Actor, Squirrel, Texas, Cornell; and specific hyperparameters.",
+  "ethics": null,
+  "summary": "This paper introduces SPECTRO-RIEMANNIAN GRAPH NEURAL NETWORKS, a novel architecture integrating spectral analysis with Riemannian geometry for graph representation learning. It operates on product manifolds combining hyperbolic, spherical, and Euclidean spaces. The method utilizes edge curvature histograms and weighted frequencies to compute manifold signatures, enabling enhanced graph learning with geometric foundations.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "evidence": {
+    "title": [
+      {
+        "page": 1,
+        "snippet": "SPECTRO-RIEMANNIAN GRAPH NEURAL NETWORKS"
+      }
+    ],
+    "methods": [
+      {
+        "page": 1,
+        "snippet": "SPECTRO-RIEMANNIAN GRAPH NEURAL NETWORKS"
+      }
+    ],
+    "results": [
+      {
+        "page": 9,
+        "snippet": ".01±0.01 10.63 SAGE 71.88±0.91 70.01±0.64 81.09±0.13 59.99±0.89 36.73±0.01 41.11±1.16 77.11±0.45 69.91±0.24 11.59 HGCN 78.50±0.14 69.55±0.39 83.72±0.21 60.18±0.57 35.89±0.29 39.93±0.35 88.11±1.12 72.88±1.15 8.97 HGAT 77.12±0.01 70.12±0.92 84.02"
+      }
+    ],
+    "limitations": [
+      {
+        "page": 19,
+        "snippet": "y"
+      }
+    ],
+    "summary": [
+      {
+        "page": 1,
+        "snippet": "SPECTRO-RIEMANNIAN GRAPH NEURAL NETWORKS"
+      }
+    ]
+  },
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null,
+  "_meta": {
+    "repair_log": [],
+    "evidence_report": {
+      "found": 5,
+      "missing": 0,
+      "details": {
+        "title": true,
+        "methods": [
+          true
+        ],
+        "results": [
+          true
+        ],
+        "limitations": true,
+        "summary": true
+      },
+      "evidence_precision": 1.0
+    }
+  }
+}

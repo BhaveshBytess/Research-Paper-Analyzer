@@ -104,6 +104,146 @@ def evidence_precision_for_paper(gold: Dict[str, Any], pred: Dict[str, Any], fuz
     precision = (matched / total) if total > 0 else None
     return precision, matched, total
 
+def numeric_consistency_check(paper: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Check internal consistency of numeric results in a paper.
+    Returns dict with consistency score and detailed checks.
+    
+    Checks performed:
+    1. Baseline comparison logic (if higher_is_better=True, ours > baseline)
+    2. Value range validation (percentages in [0,100], probabilities in [0,1])
+    3. Unit consistency (same metric should have consistent units)
+    4. Confidence score validity (must be in [0,1] if present)
+    """
+    results = paper.get("results", []) or []
+    if not results:
+        return {
+            "consistency_score": None,
+            "total_checks": 0,
+            "passed_checks": 0,
+            "failed_checks": [],
+            "notes": "No results to validate"
+        }
+    
+    total_checks = 0
+    passed = 0
+    failed = []
+    
+    # Track units by metric for consistency checking
+    metric_units = {}
+    
+    for idx, r in enumerate(results):
+        if not isinstance(r, dict):
+            continue
+            
+        value = r.get("value")
+        unit = r.get("unit")
+        metric = r.get("metric", "").lower().strip()
+        baseline = r.get("baseline")
+        ours_is = r.get("ours_is")
+        higher_is_better = r.get("higher_is_better")
+        confidence = r.get("confidence")
+        
+        # Check 1: Value must be numeric
+        total_checks += 1
+        try:
+            value_float = float(value) if value is not None else None
+            if value_float is None:
+                failed.append(f"Result[{idx}]: value is None or missing")
+            else:
+                passed += 1
+        except (ValueError, TypeError):
+            failed.append(f"Result[{idx}]: value '{value}' is not numeric")
+            continue
+        
+        # Check 2: Unit/value range consistency
+        if unit and value_float is not None:
+            total_checks += 1
+            if unit == "%" or "percent" in metric:
+                if 0 <= value_float <= 100:
+                    passed += 1
+                else:
+                    failed.append(f"Result[{idx}]: percentage value {value_float} outside [0,100] range")
+            elif "accuracy" in metric or "precision" in metric or "recall" in metric or "f1" in metric:
+                # These could be % or decimal
+                if unit == "%" and (0 <= value_float <= 100):
+                    passed += 1
+                elif unit != "%" and (0 <= value_float <= 1):
+                    passed += 1
+                elif 0 <= value_float <= 100:
+                    passed += 1
+                else:
+                    failed.append(f"Result[{idx}]: metric '{metric}' value {value_float} outside expected range")
+            else:
+                passed += 1
+        
+        # Check 3: Confidence score validity
+        if confidence is not None:
+            total_checks += 1
+            try:
+                conf_float = float(confidence)
+                if 0 <= conf_float <= 1:
+                    passed += 1
+                else:
+                    failed.append(f"Result[{idx}]: confidence {conf_float} outside [0,1] range")
+            except (ValueError, TypeError):
+                failed.append(f"Result[{idx}]: confidence '{confidence}' is not numeric")
+        
+        # Check 4: Baseline comparison logic
+        if baseline and ours_is and higher_is_better is not None and value_float is not None:
+            # Find corresponding baseline value in results
+            baseline_value = None
+            for other in results:
+                if not isinstance(other, dict):
+                    continue
+                other_name = other.get("ours_is") or other.get("baseline")
+                if other_name and other_name.lower().strip() == baseline.lower().strip():
+                    try:
+                        baseline_value = float(other.get("value"))
+                        break
+                    except:
+                        pass
+            
+            if baseline_value is not None:
+                total_checks += 1
+                if higher_is_better:
+                    if value_float >= baseline_value:
+                        passed += 1
+                    else:
+                        failed.append(f"Result[{idx}]: higher_is_better=True but ours ({value_float}) < baseline ({baseline_value})")
+                else:
+                    if value_float <= baseline_value:
+                        passed += 1
+                    else:
+                        failed.append(f"Result[{idx}]: higher_is_better=False but ours ({value_float}) > baseline ({baseline_value})")
+        
+        # Check 5: Unit consistency tracking
+        if metric:
+            if metric not in metric_units:
+                metric_units[metric] = []
+            metric_units[metric].append((idx, unit))
+    
+    # Check unit consistency across same metrics
+    for metric_name, unit_list in metric_units.items():
+        if len(unit_list) > 1:
+            units_seen = set(u for _, u in unit_list if u)
+            if len(units_seen) > 1:
+                total_checks += 1
+                failed.append(f"Metric '{metric_name}' has inconsistent units: {units_seen}")
+            elif len(units_seen) == 1:
+                total_checks += 1
+                passed += 1
+    
+    consistency_score = (passed / total_checks) if total_checks > 0 else None
+    
+    return {
+        "consistency_score": consistency_score,
+        "total_checks": total_checks,
+        "passed_checks": passed,
+        "failed_checks": failed,
+        "notes": f"Validated {len(results)} results with {total_checks} consistency checks"
+    }
+
 def numeric_metrics_for_paper(gold: Dict[str, Any], pred: Dict[str, Any]) -> Dict[str, Any]:
     """
     For each gold result record, attempt to match a pred result by dataset+metric (case-insensitive exact or fuzzy).
@@ -188,6 +328,11 @@ def evaluate_pair(gold: Dict[str, Any], pred: Dict[str, Any], fuzzy_threshold: f
     # numeric metrics
     nm = numeric_metrics_for_paper(gold, pred)
     metrics.update(nm)
+    
+    # numeric consistency check (self-evaluation)
+    consistency = numeric_consistency_check(pred)
+    metrics["numeric_consistency"] = consistency.get("consistency_score")
+    metrics["numeric_consistency_details"] = consistency
 
     # summary token F1
     metrics["summary_f1"] = token_f1(gold.get("summary") or "", pred.get("summary") or "")

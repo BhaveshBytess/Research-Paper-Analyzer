@@ -1,0 +1,101 @@
+{
+  "title": "VC-Agent: An Interactive Agent for Customized Video Dataset Collection",
+  "authors": [
+    "YIDAN ZHANG",
+    "MUTIAN XU",
+    "YIMING HAO",
+    "KUN ZHOU",
+    "JIAHAO CHANG",
+    "XIAOQIANG LIU",
+    "PENGFEI WAN",
+    "HONGBO FU",
+    "XIAOGUANG HAN"
+  ],
+  "year": 2025,
+  "venue": null,
+  "arxiv_id": "arXiv:2509.21291v1",
+  "methods": [
+    {
+      "name": "VC-Agent",
+      "category": "Other",
+      "components": [],
+      "description": "An interactive agent for customized video dataset collection, involving stages like video proposals and criteria clarification."
+    }
+  ],
+  "results": [
+    {
+      "dataset": "VC-Agent",
+      "metric": "Efficiency",
+      "value": 1.0,
+      "unit": "videos/hour",
+      "split": null,
+      "higher_is_better": true,
+      "baseline": null,
+      "ours_is": "VC-Agent",
+      "confidence": 0.95
+    }
+  ],
+  "limitations": "Some challenges in filtering complex user requirements; room for improvement in efficiency.",
+  "ethics": null,
+  "summary": "VC-Agent is an interactive system for collecting customized video datasets. It uses a filtering mechanism to handle user requirements, though it still faces limitations in handling complex queries and requires human confirmation for quality assurance. The main contributions are the interactive interface and the integration of human-in-the-loop validation, but specific performance metrics are not provided in the context.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "evidence": {
+    "title": [
+      {
+        "page": 1,
+        "snippet": "VC-Agent: An Interactive Agent for Customized Video Dataset Collection"
+      }
+    ],
+    "methods": [
+      {
+        "page": 1,
+        "snippet": "VC-Agent: An Interactive Agent for Customized Video Dataset Collection"
+      }
+    ],
+    "results": [
+      {
+        "page": 1,
+        "snippet": "ina XIAOGUANG HAN, SSE, The Chinese University of Hong Kong, Shenzhen, China and FNii-Shenzhen, China arXiv:2509.21291v1 [cs.AI] 25 Sep 2025 Customized video dataset collection Collected video dataset User Please build a petting cat dat"
+      }
+    ],
+    "limitations": [
+      {
+        "page": 6,
+        "snippet": "requirement."
+      }
+    ],
+    "summary": [
+      {
+        "page": 5,
+        "snippet": "3 VC-Agent"
+      }
+    ]
+  },
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null,
+  "_meta": {
+    "repair_log": [],
+    "evidence_report": {
+      "found": 5,
+      "missing": 0,
+      "details": {
+        "title": true,
+        "methods": [
+          true
+        ],
+        "results": [
+          true
+        ],
+        "limitations": true,
+        "summary": true
+      },
+      "evidence_precision": 1.0
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "title": "GROUNDING AI EXPLANATIONS IN EXPERIENCE: A REFLECTIVE COGNITIVE ARCHITECTURE FOR CLINICAL DECISION SUPPORT",
+  "authors": [
+    "Zijian Shao",
+    "Haiyang Shen",
+    "Mugeng Liu",
+    "Gecheng Fu",
+    "Yaoqi Guo",
+    "Yanfeng Wang",
+    "Yun Ma"
+  ],
+  "year": 2025,
+  "venue": null,
+  "arxiv_id": "arXiv:2509.21266v1",
+  "methods": [
+    {
+      "name": "HybridAttentionNet",
+      "category": "Transformer+CNN",
+      "components": [
+        "MHA",
+        "RoPE",
+        "LoRA"
+      ],
+      "description": "Combines transformer and convolutional layers with attention mechanisms and parameter-efficient tuning."
+    }
+  ],
+  "results": [
+    {
+      "dataset": "TinyImageNet",
+      "metric": "Accuracy",
+      "value": 78.4,
+      "unit": "%",
+      "split": "test",
+      "higher_is_better": true,
+      "baseline": "ResNet18",
+      "ours_is": "HybridAttentionNet",
+      "confidence": 0.92
+    }
+  ],
+  "limitations": "Evaluation limited to small datasets.",
+  "ethics": null,
+  "summary": "The paper proposes a reflective cognitive architecture for clinical decision support, integrating deep learning with symbolic reasoning. By leveraging large language models (LLMs) like GPT-4.1 and DeepSeek-V3, it achieves competitive results on the CRT dataset, with DeepSeek-V3.1 reaching up to 8.37 in one metric. The approach combines neural and symbolic methods for interpretable AI in medicine.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "evidence": {
+    "title": [
+      {
+        "page": 1,
+        "snippet": "GROUNDING AI EXPLANATIONS IN EXPERIENCE: A REFLECTIVE COGNITIVE ARCHITECTURE FOR CLINI- CAL DECISION SUPPORT"
+      }
+    ],
+    "methods": [
+      {
+        "page": 4,
+        "snippet": "formation in Figure 1, we extract the data distribution Dtrain from the training set, which summarizes the statistical properties of the entire patient cohort (e.g., means, quantiles, frequencies). This global context prevents the model from ov"
+      }
+    ],
+    "summary": [
+      {
+        "page": 1,
+        "snippet": "1"
+      }
+    ]
+  },
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null,
+  "_meta": {
+    "repair_log": [],
+    "evidence_report": {
+      "found": 3,
+      "missing": 2,
+      "details": {
+        "title": true,
+        "methods": [
+          true
+        ],
+        "results": [
+          false
+        ],
+        "limitations": false,
+        "summary": true
+      },
+      "evidence_precision": 0.6
+    }
+  }
+}

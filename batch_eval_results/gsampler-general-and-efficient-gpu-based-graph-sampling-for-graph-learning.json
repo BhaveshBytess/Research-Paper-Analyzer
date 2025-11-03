@@ -1,0 +1,93 @@
+{
+  "title": "gSampler: General and Efficient GPU-based Graph Sampling for Graph Learning",
+  "authors": [
+    "Ping Gong",
+    "Renjie Liu",
+    "Zunyao Mao",
+    "Zhenkun Cai",
+    "Xiao Yan",
+    "Cheng Li",
+    "Minjie Wang",
+    "Zhuozhao Li"
+  ],
+  "year": 2023,
+  "venue": "29th Symposium on Operating Systems Principles",
+  "arxiv_id": null,
+  "methods": [
+    {
+      "name": "gSampler",
+      "category": "Other",
+      "components": [],
+      "description": "General and efficient GPU-based graph sampling method for graph learning"
+    }
+  ],
+  "results": [
+    {
+      "dataset": "Ogbn-Products",
+      "metric": "Ratio of graph sampling time",
+      "value": 3.0,
+      "unit": null,
+      "split": null,
+      "higher_is_better": null,
+      "baseline": "native implementations of PyG and DGL",
+      "ours_is": "gSampler",
+      "confidence": null
+    }
+  ],
+  "limitations": null,
+  "ethics": null,
+  "summary": "gSampler is a GPU-based graph sampling system designed for graph learning tasks. It achieves up to 32x speedup compared to state-of-the-art CPU-based methods on large graphs like OGB-products. It supports various sampling algorithms including node-wise, layer-wise, and subgraph sampling, and provides a flexible API for integration with deep learning frameworks.",
+  "confidence": {
+    "metadata": 1.0,
+    "results": null
+  },
+  "evidence": {
+    "title": [
+      {
+        "page": 1,
+        "snippet": "gSampler: General and Efficient GPU-based Graph Sampling for Graph Learning"
+      }
+    ],
+    "methods": [
+      {
+        "page": 1,
+        "snippet": "gSampler: General and Efficient GPU-based Graph Sampling for Graph Learning"
+      }
+    ],
+    "results": [
+      {
+        "page": 1,
+        "snippet": "source at https://tinyurl.com/29twthd4. 1 Introduction Nowadays, graph learning models, such as graph embedding (GE) [3] and graph neural networks (GNNs) [64], play a vital role in supporting important applications such as recommen- dation"
+      }
+    ],
+    "summary": [
+      {
+        "page": 2,
+        "snippet": "g"
+      }
+    ]
+  },
+  "tasks": [],
+  "datasets": [],
+  "ablations": [],
+  "open_source": null,
+  "novelty": null,
+  "_meta": {
+    "repair_log": [],
+    "evidence_report": {
+      "found": 4,
+      "missing": 0,
+      "details": {
+        "title": true,
+        "methods": [
+          true
+        ],
+        "results": [
+          true
+        ],
+        "summary": true
+      },
+      "evidence_precision": 1.0
+    }
+  }
+}
