@@ -5,14 +5,14 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 ![Success Rate](https://img.shields.io/badge/success%20rate-100%25-success)
 ![Benchmark Papers](https://img.shields.io/badge/papers%20tested-10-blue)
 ![Evidence Precision](https://img.shields.io/badge/evidence%20precision-81%25-green)
 ![Numeric Consistency](https://img.shields.io/badge/numeric%20consistency-100%25-brightgreen)
+[![PyMuPDF](https://img.shields.io/badge/PDF-PyMuPDF-red?logo=adobe)](https://pymupdf.readthedocs.io/)
+[![Pydantic](https://img.shields.io/badge/validation-Pydantic-E92063?logo=pydantic)](https://docs.pydantic.dev/)
 [![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B?logo=streamlit)](https://streamlit.io)
 [![DeepSeek](https://img.shields.io/badge/LLM-DeepSeek%20v3.1-blue)](https://deepseek.com)
-[![Made with Love](https://img.shields.io/badge/made%20with-❤️-red.svg)](https://github.com/BhaveshBytess)
 
 ---
 
