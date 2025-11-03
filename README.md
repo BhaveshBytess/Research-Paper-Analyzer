@@ -19,7 +19,7 @@
 
 ## 🚀 Live Demo
 
-**Try it now:** [https://research-paper-analyzer.streamlit.app](https://research-paper-analyzer.streamlit.app)
+**Try it now:** [https://research-paper-analyzer.streamlit.app]([https://research-paper-analyzer.streamlit.app](https://research-paper-analyzer-ack6bpdauvevnlnfbx7gpz.streamlit.app/))
 
 *Note: Demo uses DeepSeek v3.1 free tier. First run may take 30-60 seconds for model initialization.*
 
